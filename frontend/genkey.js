@@ -1,5 +1,5 @@
 
-const BACKEND_URL = "https://your-backend.onrender.com";
+const BACKEND_URL = "https://key-panel-ai3.onrender.com";
 const STORE_SECRET_KEY = "*45GtrpQY8hz..."; // Giữ nguyên từ bản gốc
 const MIN_BALANCE = 50000;
 
