@@ -6,75 +6,80 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware parse JSON và urlencoded (form data)
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const USERS_FILE = path.join(__dirname, 'users.json');
-
+// Hàm đọc users từ file JSON
 function readUsersFromFile() {
-  try {
-    if (!fs.existsSync(USERS_FILE)) {
-      fs.writeFileSync(USERS_FILE, '[]', 'utf8');
-    }
-    const data = fs.readFileSync(USERS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error("Lỗi đọc file users.json:", err);
-    return [];
+  const filePath = path.join(__dirname, 'users.json');
+  if (!fs.existsSync(filePath)) {
+    fs.writeFileSync(filePath, '[]', 'utf8'); // tạo file rỗng nếu chưa tồn tại
   }
+  const data = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(data);
 }
 
+// Hàm ghi users vào file JSON
 function writeUsersToFile(users) {
-  try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2), 'utf8');
-  } catch (err) {
-    console.error("Lỗi ghi file users.json:", err);
-  }
+  const filePath = path.join(__dirname, 'users.json');
+  fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf8');
 }
 
-// Đăng ký
+// API đăng ký
 app.post('/api/register', (req, res) => {
+  console.log("Body nhận được:", req.body);
+
   const { username, password, confirm } = req.body;
 
   if (!username || !password || !confirm) {
-    return res.status(400).send("Vui lòng nhập đầy đủ thông tin");
+    return res.status(400).send('Vui lòng nhập đủ thông tin');
   }
+
   if (password !== confirm) {
-    return res.status(400).send("Mật khẩu xác nhận không khớp");
+    return res.status(400).send('Mật khẩu xác nhận không khớp');
   }
 
-  let users = readUsersFromFile();
+  const users = readUsersFromFile();
 
-  if (users.find(u => u.username === username)) {
-    return res.status(409).send("Tài khoản đã tồn tại");
+  const userExists = users.find(u => u.username === username);
+  if (userExists) {
+    return res.status(409).send('Tài khoản đã tồn tại');
   }
 
   users.push({ username, password });
   writeUsersToFile(users);
 
-  res.status(201).send("Đăng ký thành công");
+  console.log("Đăng ký thành công:", username);
+  res.status(201).send('Đăng ký thành công');
 });
 
-// Đăng nhập
+// API đăng nhập
 app.post('/api/login', (req, res) => {
+  console.log("Body login nhận được:", req.body);
+
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).send("Vui lòng nhập tài khoản và mật khẩu");
+    return res.status(400).send("Thiếu username hoặc password");
   }
 
   const users = readUsersFromFile();
 
-  const user = users.find(u => u.username === username && u.password === password);
+  const found = users.find(u => u.username === username && u.password === password);
 
-  if (user) {
-    return res.status(200).send("Đăng nhập thành công");
+  if (found) {
+    console.log("Đăng nhập thành công:", username);
+    res.status(200).send("Đăng nhập thành công");
   } else {
-    return res.status(401).send("Sai tài khoản hoặc mật khẩu");
+    res.status(401).send("Sai tài khoản hoặc mật khẩu");
   }
 });
 
+// Serve static frontend files nếu cần (nếu bạn có thư mục frontend)
+// app.use(express.static(path.join(__dirname, 'frontend')));
+
 app.listen(PORT, () => {
-  console.log(`Server chạy tại http://localhost:${PORT}`);
+  console.log(`Server đang chạy tại: http://localhost:${PORT}`);
 });
