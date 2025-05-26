@@ -1,7 +1,8 @@
 
 const BACKEND_URL = "https://key-panel-ai3.onrender.com";
-const STORE_SECRET_KEY = "*45GtrpQY8hz..."; // Giữ nguyên từ bản gốc
 const MIN_BALANCE = 50000;
+const STORE_SECRET_KEY = "*45GtrpQY8hzL9alhfjkshjdgsdjhiufbv_XZ$!@^&*()+|[]{}<>~l5eWJ@PgfaM#casjskdlj80y8907851uhkggbOPw1Fkc41t%z5a^dfg&hjk3";
+
 
 function checksum(str) {
   let a = 1, c = 0;
@@ -26,29 +27,12 @@ function encrypt(data, salt) {
   ).join(''));
 }
 
-async function getBalance() {
-  try {
-    const res = await fetch(`${BACKEND_URL}/balance`);
-    const data = await res.json();
-    return data.balance;
-  } catch (e) {
-    alert("❌ Không thể kết nối đến máy chủ!");
-    return 0;
-  }
-}
-
-document.getElementById("generateBtn").addEventListener("click", async () => {
+function generateCode() {
   const serial = document.getElementById("serialInput").value.trim();
   const expireDate = document.getElementById("expireInput").value;
 
   if (!serial || !expireDate) {
-    alert("⚠️ Vui lòng nhập đầy đủ thông tin.");
-    return;
-  }
-
-  const balance = await getBalance();
-  if (balance < MIN_BALANCE) {
-    alert(`⚠️ Số dư hiện tại là ${balance} VND. Cần ít nhất ${MIN_BALANCE} VND.`);
+    alert("Vui lòng nhập Serial và ngày hết hạn!");
     return;
   }
 
@@ -58,4 +42,80 @@ document.getElementById("generateBtn").addEventListener("click", async () => {
   const encrypted = encrypt(raw, STORE_SECRET_KEY);
 
   document.getElementById("result").value = encrypted;
+
+  saveActivationToHistory({
+    inputString: serial,
+    licenseKey: encrypted,
+    remainingBalance: null,
+    transactionCode: null
+  });
+}
+
+function saveActivationToHistory(data) {
+  let activationHistory = JSON.parse(localStorage.getItem('activationHistory')) || [];
+  const historyItem = {
+    inputString: data.inputString,
+    licenseKey: data.licenseKey,
+    timestamp: data.timestamp || Math.floor(Date.now() / 1000),
+    remainingBalance: data.remainingBalance,
+    transactionCode: data.transactionCode || generateRandomId()
+  };
+  activationHistory.unshift(historyItem);
+  if (activationHistory.length > 50) {
+    activationHistory = activationHistory.slice(0, 50);
+  }
+  localStorage.setItem('activationHistory', JSON.stringify(activationHistory));
+
+  if (document.getElementById('historyContainer').style.display === 'block') {
+    loadActivationHistory();
+  }
+}
+
+function generateRandomId() {
+  return Math.random().toString(36).substring(2, 10);
+}
+
+function loadActivationHistory() {
+  const historyItems = document.getElementById('historyItems');
+  const activationHistory = JSON.parse(localStorage.getItem('activationHistory')) || [];
+  historyItems.innerHTML = '';
+  if (activationHistory.length === 0) {
+    historyItems.innerHTML = '<p>Chưa có lịch sử kích hoạt nào.</p>';
+    return;
+  }
+
+  activationHistory.forEach(item => {
+    const date = new Date(item.timestamp * 1000).toLocaleString('vi-VN');
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `
+      <div class="date">📅 ${date}</div>
+      <div class="input">🔖 Chuỗi nhập: ${item.inputString}</div>
+      <div class="key">🔑 Khóa: ${item.licenseKey}</div>
+    `;
+    historyItems.appendChild(div);
+  });
+}
+
+function toggleHistory() {
+  const container = document.getElementById('historyContainer');
+  if (container.style.display === 'block') {
+    container.style.display = 'none';
+  } else {
+    container.style.display = 'block';
+    loadActivationHistory();
+  }
+}
+
+function clearHistory() {
+  if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử kích hoạt?')) {
+    localStorage.removeItem('activationHistory');
+    loadActivationHistory();
+  }
+}
+
+// Tự động gán nút tạo key nếu dùng addEventListener thay vì onclick trong HTML
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('generateBtn');
+  if (btn) btn.addEventListener('click', generateCode);
 });
