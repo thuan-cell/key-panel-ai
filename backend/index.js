@@ -5,7 +5,9 @@ const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const USERS_FILE = path.join(__dirname, "users.json");
+
+// 🔧 Sửa: Lưu file người dùng trong thư mục tạm (Render cho phép ghi ở /tmp)
+const USERS_FILE = path.join("/tmp", "users.json");
 
 app.use(cors());
 app.use(express.json());
@@ -24,19 +26,36 @@ app.post("/api/register", (req, res) => {
   const { username, password } = req.body;
 
   let users = [];
+
+  // Nếu file đã tồn tại → đọc danh sách
   if (fs.existsSync(USERS_FILE)) {
-    users = JSON.parse(fs.readFileSync(USERS_FILE));
+    try {
+      users = JSON.parse(fs.readFileSync(USERS_FILE));
+    } catch (err) {
+      console.error("❌ Lỗi đọc file:", err);
+      users = [];
+    }
   }
 
+  // Kiểm tra trùng username
   if (users.find(u => u.username === username)) {
     res.setHeader("Content-Type", "text/plain");
     return res.send("Tài khoản đã tồn tại");
   }
 
+  // Thêm tài khoản mới
   users.push({ username, password });
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
-  res.setHeader("Content-Type", "text/plain");
-  res.send("Đăng ký thành công");
+
+  // Ghi lại file mới vào /tmp
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    console.log("✅ Đã ghi file users.json thành công.");
+    res.setHeader("Content-Type", "text/plain");
+    res.send("Đăng ký thành công");
+  } catch (err) {
+    console.error("❌ Lỗi ghi file:", err);
+    res.status(500).send("Lỗi hệ thống khi lưu tài khoản");
+  }
 });
 
 // Đăng nhập
@@ -48,7 +67,15 @@ app.post("/api/login", (req, res) => {
     return res.send("Chưa có tài khoản nào");
   }
 
-  const users = JSON.parse(fs.readFileSync(USERS_FILE));
+  let users = [];
+  try {
+    users = JSON.parse(fs.readFileSync(USERS_FILE));
+  } catch (err) {
+    console.error("❌ Lỗi đọc file khi đăng nhập:", err);
+    res.setHeader("Content-Type", "text/plain");
+    return res.send("Lỗi hệ thống");
+  }
+
   const user = users.find(u => u.username === username && u.password === password);
 
   res.setHeader("Content-Type", "text/plain");
