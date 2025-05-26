@@ -4,7 +4,8 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
+
 
 // 💡 Kiểm tra môi trường đang chạy ở Render hay local
 const IS_RENDER = process.env.RENDER === "true";
