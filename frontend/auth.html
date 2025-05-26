@@ -1,142 +1,153 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
-  <title>VĂ RETOUCH - Đăng nhập / Đăng ký</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <meta charset="UTF-8" />
+  <title>Đăng nhập / Đăng ký</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
-      font-family: 'Montserrat', sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
       background: linear-gradient(to right, #4e54c8, #8f94fb);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
     .container {
       background: white;
-      border-radius: 15px;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
-      max-width: 400px;
-      width: 100%;
       padding: 30px;
+      border-radius: 12px;
+      width: 350px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.3);
     }
     h2 {
-      margin-top: 0;
       text-align: center;
-    }
-    .input-group {
-      position: relative;
       margin-bottom: 20px;
     }
-    .input-group input {
+    input {
       width: 100%;
-      padding: 12px 40px 12px 40px;
-      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 15px;
       border-radius: 8px;
+      border: 1px solid #ccc;
       font-size: 1rem;
     }
-    .input-group .icon {
-      position: absolute;
-      top: 50%;
-      left: 12px;
-      transform: translateY(-50%);
-      color: #888;
-    }
-    .show-pass {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #888;
-    }
-    .tf-button {
+    button {
       width: 100%;
-      background: #4e54c8;
+      padding: 12px;
+      background-color: #4e54c8;
       color: white;
       border: none;
       border-radius: 8px;
-      padding: 12px;
       font-size: 1rem;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background-color 0.3s;
     }
-    .tf-button:hover {
-      background: #3b3fbd;
+    button:hover {
+      background-color: #3b3fbd;
     }
-    .toggle-link {
+    .link {
+      text-align: center;
       margin-top: 10px;
-      text-align: center;
-    }
-    .toggle-link a {
-      color: #333;
-      text-decoration: underline;
       cursor: pointer;
-    }
-    .text-tiny {
-      font-size: 0.8rem;
-      color: #aaa;
-      text-align: center;
-      margin-top: 20px;
+      color: #4e54c8;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
-    <!-- Form đăng nhập -->
+
+    <!-- Login Form -->
     <div id="loginForm">
       <h2>Đăng nhập</h2>
-      <div class="input-group">
-        <span class="icon"><i class="fa fa-user"></i></span>
-        <input type="text" id="username" placeholder="Tên đăng nhập" maxlength="24" required>
-      </div>
-      <div class="input-group">
-        <span class="icon"><i class="fa fa-lock"></i></span>
-        <input type="password" id="password" placeholder="Mật khẩu" maxlength="24" required>
-        <span class="show-pass" onclick="togglePassword()">
-          <i class="fa fa-eye view"></i>
-          <i class="fa fa-eye-slash hide" style="display:none;"></i>
-        </span>
-      </div>
-      <button onclick="login()" class="tf-button">Đăng nhập</button>
-      <div id="login_result" class="toggle-link"></div>
-      <div class="toggle-link">
-        Chưa có tài khoản? <a onclick="showRegister()">Đăng ký</a>
-      </div>
+      <input type="text" id="username" placeholder="Tên đăng nhập" maxlength="24" />
+      <input type="password" id="password" placeholder="Mật khẩu" maxlength="24" />
+      <button id="btnLogin">Đăng nhập</button>
+      <div class="link" id="showRegister">Chưa có tài khoản? Đăng ký</div>
     </div>
 
-    <!-- Form đăng ký -->
+    <!-- Register Form -->
     <div id="registerForm" style="display:none;">
       <h2>Đăng ký</h2>
-      <div class="input-group">
-        <span class="icon"><i class="fa fa-user"></i></span>
-        <input type="text" id="reg_username" placeholder="Tên đăng nhập" maxlength="24" required>
-      </div>
-      <div class="input-group">
-        <span class="icon"><i class="fa fa-lock"></i></span>
-        <input type="password" id="reg_password" placeholder="Mật khẩu" maxlength="24" required>
-      </div>
-      <div class="input-group">
-        <span class="icon"><i class="fa fa-lock"></i></span>
-        <input type="password" id="reg_confirm" placeholder="Nhập lại mật khẩu" maxlength="24" required>
-      </div>
-      <button onclick="register()" class="tf-button">Tạo tài khoản</button>
-      <div id="register_result" class="toggle-link"></div>
-      <div class="toggle-link">
-        Đã có tài khoản? <a onclick="showLogin()">Đăng nhập</a>
-      </div>
+      <input type="text" id="reg_username" placeholder="Tên đăng nhập" maxlength="24" />
+      <input type="password" id="reg_password" placeholder="Mật khẩu" maxlength="24" />
+      <input type="password" id="reg_confirm" placeholder="Xác nhận mật khẩu" maxlength="24" />
+      <button id="btnRegister">Tạo tài khoản</button>
+      <div class="link" id="showLogin">Đã có tài khoản? Đăng nhập</div>
     </div>
 
-    <div class="text-tiny">© 2025 VĂ RETOUCH. All rights reserved.</div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="unified-auth.js"></script>
+  <script>
+    const API_BASE = "http://localhost:3000/api";
+
+    function showLogin() {
+      $("#registerForm").hide();
+      $("#loginForm").show();
+    }
+
+    function showRegister() {
+      $("#loginForm").hide();
+      $("#registerForm").show();
+    }
+
+    $("#showRegister").click(showRegister);
+    $("#showLogin").click(showLogin);
+
+    $("#btnLogin").click(() => {
+      const username = $("#username").val().trim();
+      const password = $("#password").val().trim();
+
+      if (!username || !password) {
+        Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ tài khoản và mật khẩu', 'error');
+        return;
+      }
+
+      $.post(`${API_BASE}/login`, { username, password })
+        .done(data => {
+          Swal.fire('Thành công', data, 'success').then(() => {
+            // Lưu trạng thái đăng nhập nếu cần
+            localStorage.setItem("loggedIn", "true");
+            localStorage.setItem("username", username);
+            // Chuyển trang hoặc xử lý tiếp
+            window.location.href = "index.html"; // Ví dụ chuyển trang chính
+          });
+        })
+        .fail(xhr => {
+          Swal.fire('Lỗi', xhr.responseText || 'Đăng nhập thất bại', 'error');
+        });
+    });
+
+    $("#btnRegister").click(() => {
+      const username = $("#reg_username").val().trim();
+      const password = $("#reg_password").val().trim();
+      const confirm = $("#reg_confirm").val().trim();
+
+      if (!username || !password || !confirm) {
+        Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ thông tin', 'error');
+        return;
+      }
+      if (password !== confirm) {
+        Swal.fire('Lỗi', 'Mật khẩu xác nhận không khớp', 'error');
+        return;
+      }
+
+      $.post(`${API_BASE}/register`, { username, password, confirm })
+        .done(data => {
+          Swal.fire('Thành công', data, 'success').then(() => {
+            showLogin();
+          });
+        })
+        .fail(xhr => {
+          Swal.fire('Lỗi', xhr.responseText || 'Đăng ký thất bại', 'error');
+        });
+    });
+  </script>
+
 </body>
 </html>
