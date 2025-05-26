@@ -73,7 +73,7 @@ function login() {
     contentType: 'application/json', // Specify content type
     data: JSON.stringify({ username, password }), // Send data as JSON
     success: function(data) {
-      // Backend sends plain text success message
+      // Backend sends plain text success message for login
       $('#login_result').html(data);
       if (data.includes('thành công')) { // Check for the specific success message
         localStorage.setItem('loggedIn', 'true');
@@ -125,25 +125,19 @@ function register() {
     type: 'POST',
     contentType: 'application/json', // Specify content type
     data: JSON.stringify({ username, password }), // Send data as JSON
-    success: function(data) {
-      // Backend sends plain text success message
-      $('#register_result').html(data);
-      if (data.includes('thành công')) { // Check for the specific success message
-        Swal.fire('Thành công', 'Đăng ký thành công! Đăng nhập ngay.', 'success');
-        // Clear registration fields on success
-        $('#reg_username').val('');
-        $('#reg_password').val('');
-        $('#reg_confirm').val('');
-        // Switch to login form after a short delay
-        setTimeout(() => {
-           showLogin();
-        }, 500); // 0.5 second delay
-      } else {
-         // This case should ideally not happen if backend only sends "thành công" on success status 200,
-         // but keeping it for robustness.
-         Swal.fire('Lỗi', data, 'error');
-         $('#register_result').html(''); // Clear the "Đang tạo tài khoản..." message
-      }
+    success: function(data, textStatus, jqXHR) {
+      // Based on the network log, a successful registration (200 OK) might return an empty body.
+      // We should assume success if the AJAX call is successful (status 2xx).
+      $('#register_result').html(''); // Clear the "Đang tạo tài khoản..." message
+      Swal.fire('Thành công', 'Đăng ký thành công! Đăng nhập ngay.', 'success');
+      // Clear registration fields on success
+      $('#reg_username').val('');
+      $('#reg_password').val('');
+      $('#reg_confirm').val('');
+      // Switch to login form after a short delay
+      setTimeout(() => {
+         showLogin();
+      }, 500); // 0.5 second delay
     },
     error: function(jqXHR, textStatus, errorThrown) {
       // jqXHR.responseText contains the error message from the backend (e.g., "Tài khoản đã tồn tại")
