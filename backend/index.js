@@ -90,7 +90,8 @@ app.post("/api/register", (req, res) => {
   try {
     writeUsersToFile(users);
     console.log("✅ Đăng ký thành công:", username);
-    res.status(200).send("Đăng ký thành công"); // Trả về status 200 cho thành công
+    // Changed to send status 200 with empty body to match the request dump
+    res.sendStatus(200);
   } catch (err) {
     console.error("❌ Đăng ký thất bại: Lỗi khi lưu tài khoản:", err);
     res.status(500).send("Lỗi khi lưu tài khoản");
