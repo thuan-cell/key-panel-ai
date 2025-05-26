@@ -1,20 +1,42 @@
-function togglePassword() {
-  // This function is currently only linked to the login form's password field.
-  // To make it work for the register form as well, we need to make it more general
-  // or create a separate function for the register form.
-  // Let's modify it to accept an event or target element to be more flexible.
-  // However, the current HTML structure uses onclick directly, so let's keep it simple
-  // and assume it's only for the login form as per the HTML.
-  const pwd = document.querySelector('#password');
-  const [view, hide] = document.querySelectorAll('#loginForm .show-pass i'); // Target icons within loginForm
-  if (pwd.type === 'password') {
-    pwd.type = 'text';
-    view.style.display = 'none';
-    hide.style.display = 'inline';
+/**
+ * Toggles the visibility of a password input field and switches the eye icons.
+ * This function is designed to be reusable for multiple password fields.
+ * It expects to be called from the `onclick` event of the `.show-pass` span.
+ *
+ * @param {Event} event The click event object.
+ */
+function togglePassword(event) {
+  // The element that was clicked is the .show-pass span
+  const showPassSpan = event.currentTarget;
+
+  // Find the parent .input-group
+  const inputGroup = showPassSpan.closest('.input-group');
+
+  if (!inputGroup) {
+    console.error("Could not find parent .input-group for password toggle.");
+    return;
+  }
+
+  // Find the password input within the same input group
+  const pwdInput = inputGroup.querySelector('input[type="password"], input[type="text"]');
+
+  // Find the view and hide icons within the clicked .show-pass span
+  const viewIcon = showPassSpan.querySelector('.fa-eye.view');
+  const hideIcon = showPassSpan.querySelector('.fa-eye-slash.hide');
+
+  if (!pwdInput || !viewIcon || !hideIcon) {
+    console.error("Could not find password input or icons within the input group.");
+    return;
+  }
+
+  if (pwdInput.type === 'password') {
+    pwdInput.type = 'text';
+    viewIcon.style.display = 'none';
+    hideIcon.style.display = 'inline';
   } else {
-    pwd.type = 'password';
-    view.style.display = 'inline';
-    hide.style.display = 'none';
+    pwdInput.type = 'password';
+    viewIcon.style.display = 'inline';
+    hideIcon.style.display = 'none';
   }
 }
 
