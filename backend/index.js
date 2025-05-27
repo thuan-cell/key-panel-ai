@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
+const fs = require("fs").promises;
 const path = require("path");
 
 const app = express();
@@ -19,8 +19,28 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/", express.static(path.join(__dirname, "../frontend")));
 
+// Helper đọc file users (async)
+async function readUsers() {
+  try {
+    const data = await fs.readFile(USERS_FILE, "utf-8");
+    return JSON.parse(data);
+  } catch (err) {
+    if (err.code === "ENOENT") {
+      // File chưa tồn tại => trả về mảng rỗng
+      return [];
+    }
+    throw err; // lỗi khác thì ném tiếp
+  }
+}
+
+// Helper ghi file users (async)
+async function writeUsers(users) {
+  const data = JSON.stringify(users, null, 2);
+  await fs.writeFile(USERS_FILE, data, "utf-8");
+}
+
 // API đăng ký
-app.post("/api/register", (req, res) => {
+app.post("/api/register", async (req, res) => {
   console.log("📩 Dữ liệu nhận từ client:", req.body);
   const { username, password } = req.body;
 
@@ -29,63 +49,61 @@ app.post("/api/register", (req, res) => {
     return res.status(400).send("Thiếu username hoặc password");
   }
 
-  let users = [];
-  if (fs.existsSync(USERS_FILE)) {
-    try {
-      users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
-    } catch (err) {
-      console.error("❌ Lỗi đọc file:", err);
-      return res.status(500).send("Lỗi đọc dữ liệu người dùng");
-    }
-  }
-
-  if (users.find(u => u.username === username)) {
-    console.log("⚠️ Tài khoản đã tồn tại:", username);
-    return res.status(400).send("Tài khoản đã tồn tại");
-  }
-
-  users.push({ username, password });
-
   try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    const users = await readUsers();
+
+    if (users.find(u => u.username === username)) {
+      console.log("⚠️ Tài khoản đã tồn tại:", username);
+      return res.status(400).send("Tài khoản đã tồn tại");
+    }
+
+    users.push({ username, password });
+
+    await writeUsers(users);
     console.log("✅ Đăng ký thành công:", username);
     return res.status(200).send("Đăng ký thành công");
   } catch (err) {
-    console.error("❌ Lỗi ghi file:", err);
-    return res.status(500).send("Lỗi khi lưu tài khoản");
+    console.error("❌ Lỗi khi xử lý đăng ký:", err);
+    return res.status(500).send("Lỗi hệ thống");
   }
 });
-
 
 // API đăng nhập
-app.post("/api/login", (req, res) => {
+app.post("/api/login", async (req, res) => {
   console.log("📩 Dữ liệu login nhận được:", req.body);
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).send("Thiếu username hoặc password");
-
-  if (!fs.existsSync(USERS_FILE)) return res.status(404).send("Chưa có tài khoản nào");
+  if (!username || !password) {
+    return res.status(400).send("Thiếu username hoặc password");
+  }
 
   try {
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+    const users = await readUsers();
+    if (users.length === 0) {
+      return res.status(404).send("Chưa có tài khoản nào");
+    }
     const found = users.find(u => u.username === username && u.password === password);
     if (found) {
-      res.send("Đăng nhập thành công");
+      return res.send("Đăng nhập thành công");
     } else {
-      res.status(401).send("Sai tài khoản hoặc mật khẩu");
+      return res.status(401).send("Sai tài khoản hoặc mật khẩu");
     }
   } catch (err) {
-    console.error("❌ Lỗi đọc file:", err);
-    res.status(500).send("Lỗi hệ thống");
+    console.error("❌ Lỗi đọc dữ liệu đăng nhập:", err);
+    return res.status(500).send("Lỗi hệ thống");
   }
 });
 
-// API kiểm tra danh sách user
-app.get("/api/users", (req, res) => {
-  if (fs.existsSync(USERS_FILE)) {
-    const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+// API lấy danh sách user
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await readUsers();
+    if (users.length === 0) {
+      return res.status(404).send("Không có người dùng nào");
+    }
     res.json(users);
-  } else {
-    res.status(404).send("Không có người dùng nào");
+  } catch (err) {
+    console.error("❌ Lỗi đọc danh sách user:", err);
+    res.status(500).send("Lỗi hệ thống");
   }
 });
 
