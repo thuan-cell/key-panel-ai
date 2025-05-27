@@ -1,16 +1,4 @@
-function togglePassword() {
-  const pwd = document.querySelector('#password');
-  const [view, hide] = document.querySelectorAll('.show-pass i');
-  if (pwd.type === 'password') {
-    pwd.type = 'text';
-    view.style.display = 'none';
-    hide.style.display = 'inline';
-  } else {
-    pwd.type = 'password';
-    view.style.display = 'inline';
-    hide.style.display = 'none';
-  }
-}
+const API_BASE = ""; // "" = tự động theo domain, hoặc thay bằng: "https://your-app.onrender.com"
 
 function showRegister() {
   document.getElementById('loginForm').style.display = 'none';
@@ -25,22 +13,13 @@ function showLogin() {
 function login() {
   let username = $('#username').val().trim();
   let password = $('#password').val().trim();
-
   if (!username || !password) {
-    Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ thông tin!', 'error');
-    return;
+    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ!", "error");
   }
 
-  $('#login_result').html('Đang đăng nhập...');
-  $.post('/api/login', { username, password }, function(data) {
-    $('#login_result').html(data);
-    if (data.includes('thành công') || data.includes('success')) {
-      localStorage.setItem('loggedIn', 'true');
-      window.location.href = 'index.html';
-    }
-  }).fail(() => {
-    Swal.fire('Lỗi', 'Không thể kết nối máy chủ!', 'error');
-  });
+  $.post(`${API_BASE}/api/login`, { username, password })
+    .done(data => Swal.fire("OK", data, "success"))
+    .fail(xhr => Swal.fire("Lỗi", xhr.responseText || "Lỗi đăng nhập", "error"));
 }
 
 function register() {
@@ -49,23 +28,17 @@ function register() {
   let confirm = $('#reg_confirm').val();
 
   if (!username || !password || !confirm) {
-    Swal.fire('Lỗi', 'Vui lòng nhập đầy đủ thông tin!', 'error');
-    return;
+    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ!", "error");
   }
 
   if (password !== confirm) {
-    Swal.fire('Lỗi', 'Mật khẩu không khớp!', 'error');
-    return;
+    return Swal.fire("Lỗi", "Mật khẩu không khớp!", "error");
   }
 
-  $('#register_result').html('Đang tạo tài khoản...');
-  $.post('/api/register', { username, password }, function(data) {
-    $('#register_result').html(data);
-    if (data.includes('thành công') || data.includes('success')) {
-      Swal.fire('Thành công', 'Đăng ký thành công! Đăng nhập ngay.', 'success');
+  $.post(`${API_BASE}/api/register`, { username, password })
+    .done(data => {
+      Swal.fire("Thành công", data, "success");
       showLogin();
-    }
-  }).fail(() => {
-    Swal.fire('Lỗi', 'Không thể kết nối máy chủ!', 'error');
-  });
+    })
+    .fail(xhr => Swal.fire("Lỗi", xhr.responseText || "Lỗi đăng ký", "error"));
 }
