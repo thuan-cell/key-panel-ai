@@ -18,6 +18,14 @@ function getRegisteredUsers() {
 // Hàm lưu danh sách người dùng đã đăng ký vào Local Storage
 function saveRegisteredUsers(users) {
   try {
+    // Kiểm tra xem dữ liệu người dùng có vẻ đã được mã hóa mật khẩu chưa
+    // Lưu ý: Đây chỉ là kiểm tra cơ bản, không đảm bảo 100% tính bảo mật
+    if (users.length > 0 && users[0].password && typeof users[0].password === 'string' && users[0].password.length === 64) { // SHA256 length is 64 hex chars
+        console.log("Saving registered users. Passwords appear to be hashed (SHA256 length).");
+    } else {
+        console.warn("Saving registered users. Passwords may not be hashed or data structure is unexpected.");
+        // Có thể thêm cảnh báo hoặc xử lý lỗi tại đây nếu cần
+    }
     localStorage.setItem(REGISTERED_USERS_STORAGE_KEY, JSON.stringify(users));
   } catch (e) {
     console.error("Failed to save registered users to Local Storage:", e);
@@ -28,6 +36,12 @@ function saveRegisteredUsers(users) {
 // Hàm lưu thông tin người dùng đang đăng nhập vào Local Storage
 function saveCurrentUser(user) {
   try {
+    // Kiểm tra xem thông tin người dùng hiện tại có chứa mật khẩu không (không nên có)
+    if (user && user.password) {
+        console.warn("Attempting to save current user with password. This is not recommended.");
+        // Có thể xóa mật khẩu khỏi đối tượng user trước khi lưu nếu cần
+        delete user.password;
+    }
     localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
     console.log("Current user saved to local storage:", user);
   } catch (e) {
@@ -83,7 +97,7 @@ function login() {
 
     // So sánh mật khẩu đã mã hóa
     if (foundUser.password === enteredHashedPassword) {
-      // Lưu thông tin người dùng đang đăng nhập
+      // Lưu thông tin người dùng đang đăng nhập (chỉ lưu username)
       saveCurrentUser({ username: foundUser.username });
       Swal.fire("Thành công", "Đăng nhập thành công!", "success").then(() => {
         // Chuyển hướng đến trang chính sau khi đăng nhập thành công
@@ -137,18 +151,26 @@ function register() {
     // Mã hóa mật khẩu trước khi lưu
     const hashedPassword = CryptoJS.SHA256(password).toString();
 
-    // Tạo người dùng mới với mật khẩu đã mã hóa và lưu vào Local Storage
+    // Tạo người dùng mới với mật khẩu đã mã hóa
     const newUser = { username, password: hashedPassword };
-    registeredUsers.push(newUser);
-    saveRegisteredUsers(registeredUsers);
 
-    Swal.fire("Thành công", "Đăng ký thành công!", "success").then(() => {
-      // Xóa dữ liệu trên form đăng ký và chuyển về form đăng nhập
-      $("#reg_username").val('');
-      $("#reg_password").val('');
-      $("#reg_confirm").val('');
-      showLogin();
-    });
+    // Kiểm tra xem mật khẩu đã được mã hóa chưa trước khi thêm vào danh sách và lưu
+    if (typeof newUser.password === 'string' && newUser.password.length === 64) { // SHA256 length is 64 hex chars
+        registeredUsers.push(newUser);
+        // Lưu danh sách người dùng đã đăng ký vào Local Storage (mật khẩu đã mã hóa)
+        saveRegisteredUsers(registeredUsers);
+
+        Swal.fire("Thành công", "Đăng ký thành công!", "success").then(() => {
+          // Xóa dữ liệu trên form đăng ký và chuyển về form đăng nhập
+          $("#reg_username").val('');
+          $("#reg_password").val('');
+          $("#reg_confirm").val('');
+          showLogin();
+        });
+    } else {
+        console.error("Password hashing failed or resulted in unexpected format.");
+        Swal.fire("Lỗi", "Đăng ký thất bại: Lỗi xử lý mật khẩu.", "error");
+    }
   }
 }
 
