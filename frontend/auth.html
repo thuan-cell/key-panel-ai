@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Đăng nhập / Đăng ký</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="favicon.ico">
+  <!-- Ensure jQuery is loaded before your script -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      width: 350px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      background: #4e54c8;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .toggle-link {
+      text-align: center;
+      margin-top: 10px;
+    }
+    .toggle-link a {
+      color: #4e54c8;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loginForm">
+      <h2>Đăng nhập</h2>
+      <div class="input-group">
+        <input type="text" id="username" placeholder="Tên đăng nhập">
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Mật khẩu">
+      </div>
+      <button onclick="login()" class="btn">Đăng nhập</button>
+      <div class="toggle-link">Chưa có tài khoản? <a onclick="showRegister()">Đăng ký</a></div>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+      <h2>Đăng ký</h2>
+      <div class="input-group">
+        <input type="text" id="reg_username" placeholder="Tên đăng nhập">
+      </div>
+      <div class="input-group">
+        <input type="password" id="reg_password" placeholder="Mật khẩu">
+      </div>
+      <div class="input-group">
+        <input type="password" id="reg_confirm" placeholder="Nhập lại mật khẩu">
+      </div>
+      <button onclick="register()" class="btn">Tạo tài khoản</button>
+      <div class="toggle-link">Đã có tài khoản? <a onclick="showLogin()">Đăng nhập</a></div>
+    </div>
+  </div>
+
+  <!-- Link tới file JS xử lý -->
+  <!-- Ensure this script is loaded AFTER jQuery and SweetAlert2 -->
+  <script src="unified-auth.js"></script>
+</body>
+</html>
