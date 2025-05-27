@@ -193,22 +193,5 @@
       }
     });
   </script>
-  <script>
-document.addEventListener("DOMContentLoaded", function () {
-  fetch("https://key-panel-ai3.onrender.com/api/access-status")
-    .then(res => res.json())
-    .then(data => {
-      if (!data.admin_granted) {
-        Swal.fire("Từ chối truy cập", "Admin chưa cấp quyền sử dụng!", "warning")
-          .then(() => window.location.href = "auth.html");
-      }
-    })
-    .catch(() => {
-      Swal.fire("Lỗi", "Không thể kiểm tra quyền truy cập!", "error")
-        .then(() => window.location.href = "auth.html");
-    });
-});
-</script>
-
 </body>
 </html>

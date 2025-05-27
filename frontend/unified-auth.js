@@ -100,14 +100,9 @@ function login() {
       // Lưu thông tin người dùng đang đăng nhập (chỉ lưu username)
       saveCurrentUser({ username: foundUser.username });
       Swal.fire("Thành công", "Đăng nhập thành công!", "success").then(() => {
-  // Nếu là admin thì bật quyền truy cập từ xa
-  if (username === 'admin') {
-    fetch(`${BACKEND_URL}/api/grant-access`, { method: 'POST' });
-  }
-  // Chuyển hướng sau đăng nhập
-  window.location.href = 'https://key-panel-aihtml1.onrender.com/';
-});
-
+        // Chuyển hướng đến trang chính sau khi đăng nhập thành công
+        window.location.href = 'https://key-panel-aihtml1.onrender.com/';
+      });
     } else {
       // Mật khẩu không khớp
       Swal.fire("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng", "error");
@@ -184,11 +179,6 @@ function logout() {
   removeCurrentUser();
   Swal.fire("Thông báo", "Đăng xuất thành công!", "info").then(() => {
     // Chuyển hướng về trang đăng nhập/đăng ký sau khi đăng xuất
-	const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-if (currentUser.username === "admin") {
-  fetch(`${BACKEND_URL}/api/revoke-access`, { method: "POST" });
-}
-
     window.location.href = 'https://key-panel-aihtml1.onrender.com/auth.html';
   });
 }
