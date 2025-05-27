@@ -155,26 +155,3 @@
     $("#registerForm").hide();
     $("#loginForm").show();
   }
-
-  // Khi trang tải xong, kiểm tra trạng thái đăng nhập
-  $(document).ready(function() {
-    if (checkAuthStatus()) {
-      console.log("User already logged in.");
-      // Nếu đã đăng nhập, hỏi người dùng có muốn đăng xuất không
-      Swal.fire({
-        title: "Đã đăng nhập",
-        text: "Bạn đã đăng nhập. Bạn có muốn đăng xuất không?",
-        icon: "info",
-        showCancelButton: true,
-        confirmButtonText: "Đăng xuất",
-        cancelButtonText: "Ở lại"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          logout();
-        } else {
-          // Nếu chọn "Ở lại", có thể chuyển hướng đến trang chính hoặc giữ nguyên
-          // window.location.href = 'https://key-panel-aihtml1.onrender.com/'; // Tùy chọn
-        }
-      });
-    }
-  });
