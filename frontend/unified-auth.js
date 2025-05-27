@@ -11,17 +11,24 @@ function showLogin() {
 }
 
 function login() {
-  const username = $('#username').val().trim();
-  const password = $('#password').val().trim();
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-  if (!username || !password) {
-    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin!", "error");
-  }
-
-  $.post(`${API_BASE}/api/login`, { username, password })
-    .done(data => Swal.fire("✅ Thành công", data, "success"))
-    .fail(xhr => Swal.fire("❌ Lỗi", xhr.responseText || "Lỗi đăng nhập", "error"));
+  fetch("/api/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => res.text())
+  .then(data => {
+    Swal.fire("Thông báo", data, "info");
+    // xử lý chuyển trang hoặc lưu session tại đây nếu cần
+  })
+  .catch(err => Swal.fire("Lỗi", "Đăng nhập thất bại", "error"));
 }
+
 
 function register() {
   const username = document.getElementById("reg_username").value;
