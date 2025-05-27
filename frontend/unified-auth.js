@@ -172,21 +172,3 @@ function showLogin() {
   $("#registerForm").hide();
   $("#loginForm").show();
 }
-
-// Khi trang tải xong, kiểm tra trạng thái đăng nhập
-$(document).ready(function() {
-  // Lý do thông báo "Đã đăng nhập" hiện lại liên tục là vì khi người dùng đã đăng nhập
-  // và ở lại trang auth.html (thay vì chuyển hướng đi), mỗi lần trang được tải lại
-  // hoặc truy cập lại, hàm checkAuthStatus() vẫn trả về true và hiển thị lại thông báo.
-  // Để khắc phục, nếu người dùng đã đăng nhập, chúng ta nên tự động chuyển hướng họ
-  // đến trang chính thay vì hiển thị thông báo hỏi.
-  if (checkAuthStatus()) {
-    console.log("User already logged in. Redirecting to main page.");
-    // Nếu đã đăng nhập, chuyển hướng ngay lập tức đến trang chính
-    window.location.href = 'https://key-panel-aihtml1.onrender.com/';
-  } else {
-    console.log("User not logged in. Showing authentication forms.");
-    // Nếu chưa đăng nhập, giữ nguyên trang để hiển thị form đăng nhập/đăng ký
-    // (Không cần làm gì thêm ở đây vì form mặc định là loginForm)
-  }
-});
