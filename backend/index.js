@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "../frontend")));
 
-// Đọc file user
+// Đọc user
 async function readUsers() {
   try {
     const data = await fs.readFile(USERS_FILE, "utf-8");
@@ -40,7 +40,7 @@ async function writeUsers(users) {
   }
 }
 
-// Đọc trạng thái admin cấp quyền
+// Đọc trạng thái admin
 async function getAdminStatus() {
   try {
     const data = await fs.readFile(ADMIN_STATUS_FILE, "utf-8");
@@ -51,7 +51,7 @@ async function getAdminStatus() {
   }
 }
 
-// Đăng ký
+// ✅ Đăng ký
 app.post("/api/register", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
@@ -70,7 +70,7 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Đăng nhập
+// ✅ Đăng nhập
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password)
@@ -86,7 +86,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// API danh sách user (tùy chọn dùng cho debug)
+// ✅ Danh sách user (không nên public trong bản chính thức)
 app.get("/api/users", async (req, res) => {
   try {
     const users = await readUsers();
@@ -96,27 +96,27 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-// ✅ Admin cấp quyền từ xa
+// ✅ Cấp quyền admin
 app.post("/api/grant-access", async (req, res) => {
   try {
     await fs.writeFile(ADMIN_STATUS_FILE, JSON.stringify({ admin_granted: true }), "utf-8");
-    res.status(200).json({ message: "Đã cấp quyền truy cập" });
+    res.status(200).json({ success: true, message: "Đã cấp quyền truy cập" });
   } catch (err) {
-    res.status(500).json({ message: "Lỗi khi ghi quyền admin" });
+    res.status(500).json({ success: false, message: "Lỗi khi ghi quyền admin" });
   }
 });
 
-// ✅ Admin thu hồi quyền truy cập
+// ✅ Thu hồi quyền admin
 app.post("/api/revoke-access", async (req, res) => {
   try {
     await fs.writeFile(ADMIN_STATUS_FILE, JSON.stringify({ admin_granted: false }), "utf-8");
-    res.status(200).json({ message: "Đã thu hồi quyền truy cập" });
+    res.status(200).json({ success: true, message: "Đã thu hồi quyền truy cập" });
   } catch (err) {
-    res.status(500).json({ message: "Lỗi khi thu hồi quyền admin" });
+    res.status(500).json({ success: false, message: "Lỗi khi thu hồi quyền admin" });
   }
 });
 
-// ✅ Trạng thái quyền truy cập hiện tại
+// ✅ Trạng thái quyền
 app.get("/api/access-status", async (req, res) => {
   const granted = await getAdminStatus();
   res.status(200).json({ admin_granted: granted });
