@@ -29,7 +29,6 @@ function login() {
   .catch(err => Swal.fire("Lỗi", "Đăng nhập thất bại", "error"));
 }
 
-
 function register() {
   const username = $("#reg_username").val();
   const password = $("#reg_password").val();
@@ -47,14 +46,18 @@ function register() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
   })
-   .then(res => {
-  if (!res.ok) throw res;
-  return res.json();
-})
-.then(data => Swal.fire("Thành công", data.message, "success"))
-
-    .catch(async err => {
-      const msg = await err.text();
-      Swal.fire("Lỗi", msg || "Đăng ký thất bại", "error");
+    .then(async res => {
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Lỗi không xác định");
+      }
+      return res.json(); // server trả { message: "Đăng ký thành công" }
+    })
+    .then(data => {
+      Swal.fire("Thành công", data.message || "Đăng ký thành công", "success");
+      // Có thể reset form hoặc chuyển hướng ở đây nếu muốn
+    })
+    .catch(err => {
+      Swal.fire("Lỗi", err.message || "Đăng ký thất bại", "error");
     });
 }
