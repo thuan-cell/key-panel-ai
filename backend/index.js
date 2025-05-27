@@ -23,7 +23,11 @@ app.use("/", express.static(path.join(__dirname, "../frontend")));
 app.post("/api/register", (req, res) => {
   console.log("📩 Dữ liệu nhận từ client:", req.body);
   const { username, password } = req.body;
-  if (!username || !password) return res.status(400).send("Thiếu username hoặc password");
+
+  if (!username || !password) {
+    console.log("❌ Thiếu username hoặc password");
+    return res.status(400).send("Thiếu username hoặc password");
+  }
 
   let users = [];
   if (fs.existsSync(USERS_FILE)) {
@@ -36,6 +40,7 @@ app.post("/api/register", (req, res) => {
   }
 
   if (users.find(u => u.username === username)) {
+    console.log("⚠️ Tài khoản đã tồn tại:", username);
     return res.status(400).send("Tài khoản đã tồn tại");
   }
 
@@ -44,12 +49,13 @@ app.post("/api/register", (req, res) => {
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
     console.log("✅ Đăng ký thành công:", username);
-    res.send("Đăng ký thành công");
+    return res.status(200).send("Đăng ký thành công");
   } catch (err) {
     console.error("❌ Lỗi ghi file:", err);
-    res.status(500).send("Lỗi khi lưu tài khoản");
+    return res.status(500).send("Lỗi khi lưu tài khoản");
   }
 });
+
 
 // API đăng nhập
 app.post("/api/login", (req, res) => {
