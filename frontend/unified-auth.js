@@ -189,8 +189,8 @@ $(document).ready(function() {
       if (result.isConfirmed) {
         logout();
       } else {
-        // Nếu chọn "Ở lại", có thể chuyển hướng đến trang chính hoặc giữ nguyên
-        // window.location.href = 'https://key-panel-aihtml1.onrender.com/'; // Tùy chọn
+        
+         window.location.href = 'https://key-panel-aihtml1.onrender.com/'; 
       }
     });
   }
