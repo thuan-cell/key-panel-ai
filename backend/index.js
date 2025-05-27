@@ -51,6 +51,7 @@ app.post("/api/register", async (req, res) => {
 
   try {
     const users = await readUsers();
+    console.log("📁 Danh sách users hiện tại:", users);
 
     if (users.find(u => u.username === username)) {
       console.log("⚠️ Tài khoản đã tồn tại:", username);
@@ -58,15 +59,17 @@ app.post("/api/register", async (req, res) => {
     }
 
     users.push({ username, password });
+    console.log("➕ Đã thêm:", { username, password });
 
     await writeUsers(users);
     console.log("✅ Đăng ký thành công:", username);
-    return res.status(200).send("Đăng ký thành công");
+    return res.status(200).json({ message: "Đăng ký thành công" });  // ← CHỈNH Ở ĐÂY
   } catch (err) {
     console.error("❌ Lỗi khi xử lý đăng ký:", err);
     return res.status(500).send("Lỗi hệ thống");
   }
 });
+
 
 // API đăng nhập
 app.post("/api/login", async (req, res) => {
