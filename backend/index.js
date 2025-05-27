@@ -19,13 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/", express.static(path.join(__dirname, "../frontend")));
 
+// API đăng ký
 app.post("/api/register", (req, res) => {
   console.log("📩 Dữ liệu nhận từ client:", req.body);
-
   const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).send("Thiếu username hoặc password");
-  }
+  if (!username || !password) return res.status(400).send("Thiếu username hoặc password");
 
   let users = [];
   if (fs.existsSync(USERS_FILE)) {
@@ -53,22 +51,17 @@ app.post("/api/register", (req, res) => {
   }
 });
 
+// API đăng nhập
 app.post("/api/login", (req, res) => {
   console.log("📩 Dữ liệu login nhận được:", req.body);
-
   const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).send("Thiếu username hoặc password");
-  }
+  if (!username || !password) return res.status(400).send("Thiếu username hoặc password");
 
-  if (!fs.existsSync(USERS_FILE)) {
-    return res.status(404).send("Chưa có tài khoản nào");
-  }
+  if (!fs.existsSync(USERS_FILE)) return res.status(404).send("Chưa có tài khoản nào");
 
   try {
     const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
     const found = users.find(u => u.username === username && u.password === password);
-
     if (found) {
       res.send("Đăng nhập thành công");
     } else {
@@ -77,6 +70,16 @@ app.post("/api/login", (req, res) => {
   } catch (err) {
     console.error("❌ Lỗi đọc file:", err);
     res.status(500).send("Lỗi hệ thống");
+  }
+});
+
+// API kiểm tra danh sách user
+app.get("/api/users", (req, res) => {
+  if (fs.existsSync(USERS_FILE)) {
+    const users = JSON.parse(fs.readFileSync(USERS_FILE, "utf-8"));
+    res.json(users);
+  } else {
+    res.status(404).send("Không có người dùng nào");
   }
 });
 
