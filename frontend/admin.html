@@ -24,11 +24,10 @@
       border-radius: 10px;
       box-shadow: 0 0 15px #000;
       width: 350px;
-      text-align: center;
     }
     h2 {
       color: #ffcc00;
-      margin-bottom: 20px;
+      text-align: center;
     }
     input {
       width: 100%;
@@ -46,16 +45,9 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
-      margin-top: 10px;
     }
     button:hover {
       background: #e6b800;
-    }
-    #logoutBtn {
-      background-color: #e74c3c;
-    }
-    #logoutBtn:hover {
-      background-color: #c0392b;
     }
   </style>
 </head>
@@ -65,7 +57,6 @@
     <input type="text" id="username" placeholder="Tên đăng nhập">
     <input type="password" id="password" placeholder="Mật khẩu">
     <button onclick="adminLogin()">Đăng nhập</button>
-    <button id="logoutBtn" onclick="adminLogout()">Đăng xuất</button>
   </div>
 </body>
 </html>
