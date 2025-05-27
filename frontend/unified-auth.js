@@ -47,11 +47,12 @@ function register() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password })
   })
-    .then(res => {
-      if (!res.ok) throw res;
-      return res.text();
-    })
-    .then(msg => Swal.fire("Thành công", msg, "success"))
+   .then(res => {
+  if (!res.ok) throw res;
+  return res.json();
+})
+.then(data => Swal.fire("Thành công", data.message, "success"))
+
     .catch(async err => {
       const msg = await err.text();
       Swal.fire("Lỗi", msg || "Đăng ký thất bại", "error");
