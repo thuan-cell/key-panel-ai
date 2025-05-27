@@ -115,61 +115,83 @@
   </div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
+    // Chờ DOM được tải hoàn toàn
+    document.addEventListener('DOMContentLoaded', function() {
+      // Kiểm tra trạng thái đăng nhập
+      // Giả định hàm checkAuthStatus() đã được định nghĩa và có sẵn trong phạm vi toàn cục
+      // (ví dụ: trong unified-auth.js hoặc một script khác được tải trước)
+      const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
 
-    const generateButton = document.getElementById('generateBtn');
-    const logoutButton = document.getElementById('logoutBtn');
-    const historyToggleButton = document.getElementById('historyToggleButton');
-    const historyContainer = document.getElementById('historyContainer');
-    const keyGenToolCard = document.getElementById('keyGenTool');
-    const serialInput = document.getElementById('serialInput');
-    const expireInput = document.getElementById('expireInput');
-    const resultTextarea = document.getElementById('result');
+      const generateButton = document.getElementById('generateBtn');
+      const logoutButton = document.getElementById('logoutBtn');
+      const historyToggleButton = document.getElementById('historyToggleButton');
+      const historyContainer = document.getElementById('historyContainer');
+      const keyGenToolCard = document.getElementById('keyGenTool');
 
-    if (!isLoggedIn) {
-      if (generateButton) {
-        generateButton.disabled = true;
-        generateButton.title = 'Vui lòng đăng nhập để sử dụng công cụ này';
-      }
 
-      if (serialInput) serialInput.disabled = true;
-      if (expireInput) expireInput.disabled = true;
-      if (resultTextarea) resultTextarea.disabled = true;
-      if (logoutButton) logoutButton.style.display = 'none';
-      if (historyToggleButton) historyToggleButton.style.display = 'none';
-      if (historyContainer) historyContainer.style.display = 'none';
-
-      return; // Ngắt tại đây, không gọi API nếu chưa đăng nhập
-    }
-
-    // ✅ Đã đăng nhập → kiểm tra quyền admin từ server
-    fetch("https://key-panel-aihtml1.onrender.com/api/access-status")
-      .then(res => res.json())
-      .then(data => {
-        if (!data.admin_granted) {
-          Swal.fire("Từ chối truy cập", "Admin đã thu hồi quyền sử dụng!", "warning")
-            .then(() => window.location.href = "auth.html");
-        } else {
-          // ✅ Admin đã cấp quyền → bật mọi thứ
-          if (generateButton) {
-            generateButton.disabled = false;
-            generateButton.title = '';
-          }
-          if (serialInput) serialInput.disabled = false;
-          if (expireInput) expireInput.disabled = false;
-          if (resultTextarea) resultTextarea.disabled = false;
-          if (logoutButton) logoutButton.style.display = '';
-          if (historyToggleButton) historyToggleButton.style.display = '';
-          if (keyGenToolCard) keyGenToolCard.style.display = '';
+      if (!isLoggedIn) {
+        // Nếu chưa đăng nhập, vô hiệu hóa nút tạo mã
+        if (generateButton) {
+          generateButton.disabled = true;
+          generateButton.title = 'Vui lòng đăng nhập để sử dụng công cụ này';
+          // Tùy chọn: Thay đổi văn bản nút hoặc thêm thông báo
+          // generateButton.textContent = 'Đăng nhập để tạo mã';
         }
-      })
-      .catch(() => {
-        Swal.fire("Lỗi", "Không thể kiểm tra quyền truy cập từ server!", "error")
-          .then(() => window.location.href = "auth.html");
-      });
-  });
-</script>
 
+        // Tùy chọn: Vô hiệu hóa các input liên quan
+        const serialInput = document.getElementById('serialInput');
+        const expireInput = document.getElementById('expireInput');
+        const resultTextarea = document.getElementById('result');
+
+        if (serialInput) serialInput.disabled = true;
+        if (expireInput) expireInput.disabled = true;
+        if (resultTextarea) resultTextarea.disabled = true;
+
+
+        // Tùy chọn: Ẩn nút đăng xuất và lịch sử nếu chưa đăng nhập
+        if (logoutButton) logoutButton.style.display = 'none';
+        if (historyToggleButton) historyToggleButton.style.display = 'none';
+        if (historyContainer) historyContainer.style.display = 'none';
+
+        // Tùy chọn: Hiển thị thông báo hoặc chuyển hướng
+        // Swal.fire({
+        //     title: 'Truy cập bị từ chối',
+        //     text: 'Vui lòng đăng nhập để sử dụng công cụ này.',
+        //     icon: 'warning',
+        //     showCancelButton: false,
+        //     confirmButtonText: 'Đi đến trang đăng nhập'
+        // }).then((result) => {
+        //     if (result.isConfirmed) {
+        //         window.location.href = 'https://key-panel-aihtml1.onrender.com/auth.html';
+        //     }
+        // });
+
+        // Tùy chọn: Ẩn toàn bộ công cụ tạo key nếu chưa đăng nhập
+        // if (keyGenToolCard) keyGenToolCard.style.display = 'none';
+
+
+      } else {
+        // Nếu đã đăng nhập, đảm bảo nút tạo mã được kích hoạt (mặc định)
+        if (generateButton) {
+            generateButton.disabled = false;
+            generateButton.title = ''; // Xóa title nếu đã đăng nhập
+        }
+         // Đảm bảo các input được kích hoạt
+        const serialInput = document.getElementById('serialInput');
+        const expireInput = document.getElementById('expireInput');
+        const resultTextarea = document.getElementById('result');
+
+        if (serialInput) serialInput.disabled = false;
+        if (expireInput) expireInput.disabled = false;
+        if (resultTextarea) resultTextarea.disabled = false;
+
+        // Đảm bảo các nút khác hiển thị
+        if (logoutButton) logoutButton.style.display = ''; // Hoặc 'block', 'inline-block' tùy CSS
+        if (historyToggleButton) historyToggleButton.style.display = '';
+        // historyContainer sẽ được hiển thị/ẩn bởi hàm toggleHistory()
+        if (keyGenToolCard) keyGenToolCard.style.display = '';
+      }
+    });
+  </script>
 </body>
 </html>
