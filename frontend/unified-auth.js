@@ -1,34 +1,35 @@
-const API_BASE = ""; // "" = tự động theo domain, hoặc thay bằng: "https://your-app.onrender.com"
+const API_BASE = ""; // Render: tự động theo domain
 
 function showRegister() {
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('registerForm').style.display = 'block';
+  $('#loginForm').hide();
+  $('#registerForm').show();
 }
 
 function showLogin() {
-  document.getElementById('registerForm').style.display = 'none';
-  document.getElementById('loginForm').style.display = 'block';
+  $('#registerForm').hide();
+  $('#loginForm').show();
 }
 
 function login() {
-  let username = $('#username').val().trim();
-  let password = $('#password').val().trim();
+  const username = $('#username').val().trim();
+  const password = $('#password').val().trim();
+
   if (!username || !password) {
-    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ!", "error");
+    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin!", "error");
   }
 
   $.post(`${API_BASE}/api/login`, { username, password })
-    .done(data => Swal.fire("OK", data, "success"))
-    .fail(xhr => Swal.fire("Lỗi", xhr.responseText || "Lỗi đăng nhập", "error"));
+    .done(data => Swal.fire("✅ Thành công", data, "success"))
+    .fail(xhr => Swal.fire("❌ Lỗi", xhr.responseText || "Lỗi đăng nhập", "error"));
 }
 
 function register() {
-  let username = $('#reg_username').val().trim();
-  let password = $('#reg_password').val();
-  let confirm = $('#reg_confirm').val();
+  const username = $('#reg_username').val().trim();
+  const password = $('#reg_password').val();
+  const confirm = $('#reg_confirm').val();
 
   if (!username || !password || !confirm) {
-    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ!", "error");
+    return Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin!", "error");
   }
 
   if (password !== confirm) {
@@ -37,8 +38,8 @@ function register() {
 
   $.post(`${API_BASE}/api/register`, { username, password })
     .done(data => {
-      Swal.fire("Thành công", data, "success");
+      Swal.fire("✅ Thành công", data, "success");
       showLogin();
     })
-    .fail(xhr => Swal.fire("Lỗi", xhr.responseText || "Lỗi đăng ký", "error"));
+    .fail(xhr => Swal.fire("❌ Lỗi", xhr.responseText || "Lỗi đăng ký", "error"));
 }
