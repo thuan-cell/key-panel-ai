@@ -1,0 +1,255 @@
+<!-- index.html (Trang tạo key - giao diện mới + JS tách ra file genkey.js) -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo mã kích hoạt</title>
+  <link rel="stylesheet" href="style.css"> <!-- Optional nếu có CSS ngoài -->
+  <script defer src="genkey.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #4e54c8, #8f94fb);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .card {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.8rem; color: #333; }
+    label { display: block; text-align: left; margin-bottom: 5px; font-weight: 500; color: #555; }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%; padding: 15px; margin-bottom: 15px;
+      border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
+      transition: 0.2s; resize: vertical; min-height: 80px;
+    }
+    input:focus, textarea:focus { border-color: #4e54c8; outline: none; }
+    button {
+      width: 100%; padding: 15px;
+      background: #4e54c8; color: white; font-size: 1rem;
+      border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.3s ease; margin-bottom: 15px;
+    }
+    button:hover { background: #3b3fbd; }
+    .history-button {
+      width: auto; display: inline-block; margin-bottom: 20px;
+      background: #3498db; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem;
+    }
+    .history-button:hover { background: #2980b9; }
+    .history-container {
+      display: none; margin-top: 0; text-align: left; max-height: 300px;
+      overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;
+      padding: 15px; background-color: #f9f9f9;
+      width: 100%; max-width: 450px;
+    }
+    .history-container h3 { margin: 0 0 15px; color: #333; font-size: 1.2rem; }
+    .history-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .date { font-weight: bold; color: #3498db; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .input { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .key { word-break: break-word; color: #2c3e50; font-size: 0.9rem; }
+    #historyButtons { margin-top: 15px; text-align: center; }
+    .clear-history {
+      width: auto; display: inline-block; margin-top: 0;
+      background: #e74c3c; color: white; border: none;
+      padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+    }
+    .clear-history:hover { background: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>🔐 Công Cụ Tạo Mã Kích Hoạt</h2>
+    <label for="serialInput">Serial (client gửi):</label>
+    <input type="text" id="serialInput" placeholder="Nhập serial...">
+    <label for="expireInput">Ngày hết hạn:</label>
+    <input type="date" id="expireInput">
+    <button id="generateBtn">🎯 Tạo mã kích hoạt</button>
+    <label for="result">Kết quả:</label>
+    <textarea id="result" readonly></textarea>
+  </div>
+  <button class="history-button" onclick="toggleHistory()">📜 Lịch sử kích hoạt</button>
+  <div id="historyContainer" class="history-container">
+    <h3>Lịch sử kích hoạt</h3>
+    <div id="historyItems">Đang tải lịch sử...</div>
+    <div id="historyButtons">
+      <button class="clear-history" onclick="clearHistory()">🗑️ Xóa lịch sử</button>
+    </div>
+  </div>
+</body>
+</html><!-- index.html (Trang tạo key - giao diện mới + JS tách ra file genkey.js) -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo mã kích hoạt</title>
+  <link rel="stylesheet" href="style.css"> <!-- Optional nếu có CSS ngoài -->
+  <!-- SweetAlert2 for alerts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- jQuery is used in the provided JS functions -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script defer src="genkey.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #4e54c8, #8f94fb);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .card {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.8rem; color: #333; }
+    label { display: block; text-align: left; margin-bottom: 5px; font-weight: 500; color: #555; }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%; padding: 15px; margin-bottom: 15px;
+      border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
+      transition: 0.2s; resize: vertical; min-height: 80px;
+    }
+    input:focus, textarea:focus { border-color: #4e54c8; outline: none; }
+    button {
+      width: 100%; padding: 15px;
+      background: #4e54c8; color: white; font-size: 1rem;
+      border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.3s ease; margin-bottom: 15px;
+    }
+    button:hover { background: #3b3fbd; }
+    button:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+    }
+    .history-button {
+      width: auto; display: inline-block; margin-bottom: 20px;
+      background: #3498db; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem;
+    }
+    .history-button:hover { background: #2980b9; }
+    .history-container {
+      display: none; margin-top: 0; text-align: left; max-height: 300px;
+      overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;
+      padding: 15px; background-color: #f9f9f9;
+      width: 100%; max-width: 450px;
+    }
+    .history-container h3 { margin: 0 0 15px; color: #333; font-size: 1.2rem; }
+    .history-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .date { font-weight: bold; color: #3498db; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .input { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .key { word-break: break-word; color: #2c3e50; font-size: 0.9rem; }
+    #historyButtons { margin-top: 15px; text-align: center; }
+    .clear-history {
+      width: auto; display: inline-block; margin-top: 0;
+      background: #e74c3c; color: white; border: none;
+      padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+    }
+    .clear-history:hover { background: #c0392b; }
+
+    /* Styles for login/register forms */
+    #authContainer {
+        background-color: #fff;
+        padding: 40px 30px;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+    }
+    #authContainer h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.8rem; color: #333; }
+    #authContainer input[type="text"], #authContainer input[type="password"] {
+        width: 100%; padding: 15px; margin-bottom: 15px;
+        border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
+        transition: 0.2s;
+    }
+    #authContainer button {
+        width: 100%; padding: 15px;
+        background: #4e54c8; color: white; font-size: 1rem;
+        border: none; border-radius: 10px;
+        cursor: pointer; transition: background 0.3s ease; margin-bottom: 15px;
+    }
+    #authContainer button:hover { background: #3b3fbd; }
+    .switch-form-link {
+        color: #4e54c8;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 0.9rem;
+    }
+    .switch-form-link:hover {
+        color: #3b3fbd;
+    }
+    #loginForm, #registerForm {
+        display: none; /* Hidden by default */
+    }
+
+    /* Style for logout button */
+    #logoutBtn {
+        background: #e74c3c; /* Red color */
+        margin-top: 10px; /* Add some space above it */
+    }
+    #logoutBtn:hover {
+        background: #c0392b; /* Darker red on hover */
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Forms -->
+  <div id="authContainer">
+    <div id="loginForm">
+      <h2>Đăng nhập</h2>
+      <label for="username">Tên đăng nhập:</label>
+      <input type="text" id="username" placeholder="Nhập tên đăng nhập...">
+      <label for="password">Mật khẩu:</label>
+      <input type="password" id="password" placeholder="Nhập mật khẩu...">
+      <button onclick="login()">Đăng nhập</button>
+      <p>Chưa có tài khoản? <span class="switch-form-link" onclick="showRegister()">Đăng ký ngay</span></p>
+    </div>
+
+    <div id="registerForm">
+      <h2>Đăng ký</h2>
+      <label for="reg_username">Tên đăng nhập:</label>
+      <input type="text" id="reg_username" placeholder="Chọn tên đăng nhập...">
+      <label for="reg_password">Mật khẩu:</label>
+      <input type="password" id="reg_password" placeholder="Chọn mật khẩu...">
+      <label for="reg_confirm">Xác nhận mật khẩu:</label>
+      <input type="password" id="reg_confirm" placeholder="Nhập lại mật khẩu...">
+      <button onclick="register()">Đăng ký</button>
+      <p>Đã có tài khoản? <span class="switch-form-link" onclick="showLogin()">Đăng nhập</span></p>
+    </div>
+  </div>
+
+  <!-- Key Generation Tool (Initially hidden) -->
+  <div class="card" id="keyGenTool" style="display: none;">
+    <h2>🔐 Công Cụ Tạo Mã Kích Hoạt</h2>
+    <label for="serialInput">Serial (client gửi):</label>
+    <input type="text" id="serialInput" placeholder="Nhập serial...">
+    <label for="expireInput">Ngày hết hạn:</label>
+    <input type="date" id="expireInput">
+    <button id="generateBtn">🎯 Tạo mã kích hoạt</button>
+    <label for="result">Kết quả:</label>
+    <textarea id="result" readonly></textarea>
+    <!-- Add Logout Button -->
+    <button id="logoutBtn" onclick="logout()" style="display: none;">Đăng xuất</button>
+  </div>
+
+  <!-- History Section (Initially hidden) -->
+  <button class="history-button" onclick="toggleHistory()" id="historyToggleButton" style="display: none;">📜 Lịch sử kích hoạt</button>
+  <div id="historyContainer" class="history-container">
+    <h3>Lịch sử kích hoạt</h3>
+    <div id="historyItems">Đang tải lịch sử...</div>
+    <div id="historyButtons">
+      <button class="clear-history" onclick="clearHistory()">🗑️ Xóa lịch sử</button>
+    </div>
+  </div>
+
+</body>
+</html>
