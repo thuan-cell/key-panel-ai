@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Cập nhật số dư</title>
+</head>
+<body>
+  <h2>🔐 Nhập số dư (VD: 50000)</h2>
+  <input type="number" id="balanceInput" placeholder="Nhập số tiền..." />
+  <button onclick="updateBalance()">Cập nhật</button>
+  <p id="status"></p>
+
+  <script>
+    const BIN_ID = "683709868561e97a501c9633";
+    const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
+
+    function updateBalance() {
+      const value = Number(document.getElementById('balanceInput').value);
+      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': API_KEY
+        },
+        body: JSON.stringify({ balance: value })
+      })
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('status').innerText = '✅ Cập nhật thành công! Số dư mới: ' + value;
+      })
+      .catch(err => {
+        document.getElementById('status').innerText = '❌ Lỗi: ' + err.message;
+      });
+    }
+  </script>
+</body>
+</html>

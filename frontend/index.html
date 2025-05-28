@@ -131,6 +131,63 @@
 
       enableUI();
     });
-  </script>
+ 
+  document.addEventListener('DOMContentLoaded', () => {
+    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
+
+    const generateButton = document.getElementById('generateBtn');
+    const serialInput = document.getElementById('serialInput');
+    const expireInput = document.getElementById('expireInput');
+    const resultTextarea = document.getElementById('result');
+    const logoutButton = document.getElementById('logoutBtn');
+    const historyToggleButton = document.getElementById('historyToggleButton');
+    const historyContainer = document.getElementById('historyContainer');
+
+    function disableUI() {
+      [generateButton, serialInput, expireInput, resultTextarea].forEach(el => el && (el.disabled = true));
+      [logoutButton, historyToggleButton].forEach(el => el && (el.style.display = 'none'));
+      if (historyContainer) historyContainer.style.display = 'none';
+    }
+
+    function enableUI() {
+      [generateButton, serialInput, expireInput, resultTextarea].forEach(el => el && (el.disabled = false));
+      [logoutButton, historyToggleButton].forEach(el => el && (el.style.display = ''));
+    }
+
+    if (!isLoggedIn) {
+      disableUI();
+      Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
+        window.location.href = "/auth.html";
+      });
+      return;
+    }
+
+    // ✅ THÊM ĐOẠN NÀY ĐỂ CHẶN KHI SỐ DƯ < 50000
+    const BIN_ID = "683709868561e97a501c9633";
+    const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
+
+    fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      headers: {
+        'X-Master-Key': API_KEY
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const balance = data.record.balance;
+      if (balance < 50000) {
+        Swal.fire("Không đủ số dư", "Không thể tạo key. Vui lòng liên hệ admin.", "error");
+        generateButton.disabled = true;
+      }
+    })
+    .catch(() => {
+      Swal.fire("Lỗi", "Không thể kiểm tra số dư từ máy chủ", "error");
+    });
+
+    // ✅ KẾT THÚC PHẦN CHẶN THEO SỐ DƯ
+
+    enableUI();
+  });
+</script>
+
 </body>
 </html>
