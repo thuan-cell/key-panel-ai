@@ -1,9 +1,10 @@
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Tạo mã kích hoạt</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script defer src="genkey.js"></script>
@@ -81,9 +82,9 @@
   <div class="card" id="keyGenTool">
     <h2>🔐 Công Cụ Tạo Mã Kích Hoạt</h2>
     <label for="serialInput">Serial (client gửi):</label>
-    <input type="text" id="serialInput" placeholder="Nhập serial...">
+    <input type="text" id="serialInput" placeholder="Nhập serial..." autocomplete="off" />
     <label for="expireInput">Ngày hết hạn:</label>
-    <input type="date" id="expireInput">
+    <input type="date" id="expireInput" />
     <button id="generateBtn">🎯 Tạo mã kích hoạt</button>
     <label for="result">Kết quả:</label>
     <textarea id="result" readonly></textarea>
@@ -95,61 +96,193 @@
     <h3>Lịch sử kích hoạt</h3>
     <div id="historyItems">Đang tải lịch sử...</div>
     <div id="historyButtons">
-      <button class="clear-history" onclick="clearHistory()">🗑️ Xóa lịch sử</button>
+      <button class
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tạo mã kích hoạt</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script defer src="genkey.js"></script>
+  <script defer src="unified-auth.js"></script>
+  <style>
+    /* giữ nguyên style cũ */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #4e54c8, #8f94fb);
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .card {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%; max-width: 450px; text-align: center; margin-bottom: 20px;
+    }
+    h2 { margin-top: 0; margin-bottom: 20px; font-size: 1.8rem; color: #333; }
+    label { display: block; text-align: left; margin-bottom: 5px; font-weight: 500; color: #555; }
+    input[type="text"], input[type="date"], textarea {
+      width: 100%; padding: 15px; margin-bottom: 15px;
+      border: 1px solid #ccc; border-radius: 10px; font-size: 1rem;
+      transition: 0.2s; resize: vertical; min-height: 80px;
+    }
+    input:focus, textarea:focus { border-color: #4e54c8; outline: none; }
+    button {
+      width: 100%; padding: 15px;
+      background: #4e54c8; color: white; font-size: 1rem;
+      border: none; border-radius: 10px;
+      cursor: pointer; transition: background 0.3s ease; margin-bottom: 15px;
+    }
+    button:hover:not(:disabled) { background: #3b3fbd; }
+    button:disabled {
+        background: #cccccc;
+        cursor: not-allowed;
+    }
+    .history-button {
+      width: auto; display: inline-block; margin-bottom: 20px;
+      background: #3498db; padding: 10px 20px; border-radius: 8px; font-size: 0.9rem;
+    }
+    .history-button:hover { background: #2980b9; }
+    .history-container {
+      display: none; margin-top: 0; text-align: left; max-height: 300px;
+      overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;
+      padding: 15px; background-color: #f9f9f9;
+      width: 100%; max-width: 450px;
+    }
+    .history-container h3 { margin: 0 0 15px; color: #333; font-size: 1.2rem; }
+    .history-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+    .history-item:last-child { border-bottom: none; }
+    .history-item .date { font-weight: bold; color: #3498db; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .input { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 5px; }
+    .history-item .key { word-break: break-word; color: #2c3e50; font-size: 0.9rem; }
+    #historyButtons { margin-top: 15px; text-align: center; }
+    .clear-history {
+      width: auto; display: inline-block; margin-top: 0;
+      background: #e74c3c; color: white; border: none;
+      padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
+    }
+    .clear-history:hover { background: #c0392b; }
+    #logoutBtn {
+        background: #e74c3c;
+        margin-top: 10px;
+    }
+    #logoutBtn:hover {
+        background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="keyGenTool">
+    <h2>🔐 Công Cụ Tạo Mã Kích Hoạt</h2>
+    <label for="serialInput">Serial (client gửi):</label>
+    <input type="text" id="serialInput" placeholder="Nhập serial..." autocomplete="off" />
+    <label for="expireInput">Ngày hết hạn:</label>
+    <input type="date" id="expireInput" />
+    <button id="generateBtn">🎯 Tạo mã kích hoạt</button>
+    <label for="result">Kết quả:</label>
+    <textarea id="result" readonly></textarea>
+    <button id="logoutBtn" onclick="logout()">Đăng xuất</button>
+  </div>
+
+  <button class="history-button" onclick="toggleHistory()" id="historyToggleButton">📜 Lịch sử kích hoạt</button>
+  <div id="historyContainer" class="history-container">
+    <h3>Lịch sử kích hoạt</h3>
+    <div id="historyItems">Đang tải lịch sử...</div>
+    <div id="historyButtons">
+      <button class="clear-history" onclick="clearHistory()">Xóa lịch sử</button>
     </div>
   </div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const generateButton = document.getElementById('generateBtn');
-    const serialInput = document.getElementById('serialInput');
-    const expireInput = document.getElementById('expireInput');
-    const resultTextarea = document.getElementById('result');
-    const logoutButton = document.getElementById('logoutBtn');
-    const historyToggleButton = document.getElementById('historyToggleButton');
-    const historyContainer = document.getElementById('historyContainer');
-
-    // Hàm disable chỉ khóa nút tạo mã, không ẩn các thành phần khác
-    function disableGenerate() {
-      generateButton.disabled = true;
-    }
-    function enableGenerate() {
-      generateButton.disabled = false;
-    }
-
-    // Check login status
-    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-    if (!isLoggedIn) {
-      Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
+    // Kiểm tra đăng nhập, nếu chưa chuyển về trang auth
+    document.addEventListener("DOMContentLoaded", () => {
+      if (!checkAuthStatus()) {
         window.location.href = "/auth.html";
-      });
-      return;
+      } else {
+        loadBalanceAndToggleButton();
+        loadHistory();
+      }
+    });
+
+    // Giới hạn tạo mã khi số dư dưới 50,000 (giả sử API /api/balance trả về JSON {balance: number})
+    async function loadBalanceAndToggleButton() {
+      const generateBtn = document.getElementById("generateBtn");
+      try {
+        const res = await fetch("/api/balance");
+        if (!res.ok) throw new Error("Không lấy được số dư");
+        const data = await res.json();
+
+        if (data.balance < 50000) {
+          generateBtn.disabled = true;
+          Swal.fire({
+            icon: "warning",
+            title: "Số dư không đủ",
+            text: "Số dư hiện tại nhỏ hơn 50,000, bạn không thể tạo mã mới.",
+          });
+        } else {
+          generateBtn.disabled = false;
+        }
+      } catch (error) {
+        console.error(error);
+        Swal.fire("Lỗi", "Không thể kiểm tra số dư.", "error");
+      }
     }
 
-    // Kiểm tra số dư
-    const BIN_ID = "683709868561e97a501c9633";
-    const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
+    // Lịch sử kích hoạt lưu localStorage, lấy ra và hiển thị
+    function loadHistory() {
+      const container = document.getElementById("historyItems");
+      const history = JSON.parse(localStorage.getItem("activationHistory") || "[]");
+      if (history.length === 0) {
+        container.innerHTML = "<p>Chưa có lịch sử.</p>";
+        return;
+      }
+      container.innerHTML = "";
+      history.forEach(item => {
+        const div = document.createElement("div");
+        div.classList.add("history-item");
+        div.innerHTML = `
+          <div class="date">${new Date(item.date).toLocaleString()}</div>
+          <div class="input"><strong>Serial:</strong> ${item.serial}<br/><strong>Expire:</strong> ${item.expire}</div>
+          <div class="key"><strong>Key:</strong> ${item.key}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
 
-    fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-      headers: {
-        'X-Master-Key': API_KEY
-      }
-    })
-    .then(res => res.json())
-    .then(data => {
-      const balance = data.record.balance;
-      if (balance < 50000) {
-        Swal.fire("Không đủ số dư", "Không thể tạo key. Vui lòng liên hệ admin.", "warning");
-        disableGenerate();
+    function toggleHistory() {
+      const container = document.getElementById("historyContainer");
+      const btn = document.getElementById("historyToggleButton");
+      if (container.style.display === "block") {
+        container.style.display = "none";
+        btn.textContent = "📜 Lịch sử kích hoạt";
       } else {
-        enableGenerate();
+        container.style.display = "block";
+        btn.textContent = "❌ Đóng lịch sử";
       }
-    })
-    .catch(() => {
-      Swal.fire("Lỗi", "Không thể kiểm tra số dư từ máy chủ", "error");
-      disableGenerate();
-    });
-  });
+    }
+
+    function clearHistory() {
+      Swal.fire({
+        title: "Xóa lịch sử?",
+        text: "Bạn có chắc muốn xóa toàn bộ lịch sử kích hoạt?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Có, xóa",
+        cancelButtonText: "Hủy"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          localStorage.removeItem("activationHistory");
+          loadHistory();
+          Swal.fire("Đã xóa!", "Lịch sử đã được xóa.", "success");
+        }
+      });
+    }
   </script>
 </body>
 </html>

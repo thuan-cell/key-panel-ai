@@ -1,125 +1,79 @@
-const REGISTERED_USERS_STORAGE_KEY = 'registeredUsers';
-const CURRENT_USER_STORAGE_KEY = 'currentUser';
+// unified-auth.js
 
-function getRegisteredUsers() {
-  const usersJson = localStorage.getItem(REGISTERED_USERS_STORAGE_KEY);
-  try {
-    return usersJson ? JSON.parse(usersJson) : [];
-  } catch (e) {
-    console.error("Lỗi đọc danh sách người dùng:", e);
-    return [];
-  }
+const API_LOGIN = "/api/login";
+
+// Lưu trạng thái đăng nhập trong sessionStorage
+function setLoggedIn(username) {
+  sessionStorage.setItem("loggedInUser", username);
 }
 
-function saveRegisteredUsers(users) {
-  try {
-    localStorage.setItem(REGISTERED_USERS_STORAGE_KEY, JSON.stringify(users));
-  } catch (e) {
-    console.error("Lỗi lưu danh sách người dùng:", e);
-    Swal.fire("Lỗi", "Không thể lưu dữ liệu người dùng.", "error");
-  }
+function getLoggedInUser() {
+  return sessionStorage.getItem("loggedInUser");
 }
 
-function saveCurrentUser(user) {
-  try {
-    if (!user) {
-      localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
-      return;
-    }
-    const userCopy = { ...user };
-    if (userCopy.password) delete userCopy.password;
-    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(userCopy));
-  } catch (e) {
-    console.error("Lỗi lưu người dùng đăng nhập:", e);
-    Swal.fire("Lỗi", "Không thể lưu thông tin đăng nhập.", "error");
-  }
+function clearLogin() {
+  sessionStorage.removeItem("loggedInUser");
 }
 
-function removeCurrentUser() {
-  localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
-}
-
+// Kiểm tra trạng thái đăng nhập (true/false)
 function checkAuthStatus() {
-  try {
-    const currentUserStr = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
-    if (!currentUserStr) return false;
-    const currentUser = JSON.parse(currentUserStr);
-    return currentUser && currentUser.username;
-  } catch (e) {
-    console.error('Lỗi kiểm tra đăng nhập:', e);
+  return !!getLoggedInUser();
+}
+
+// Chuyển hướng nếu chưa đăng nhập (dùng cho các trang index.html, tool... )
+function requireAuth() {
+  if (!checkAuthStatus()) {
+    Swal.fire({
+      icon: "error",
+      title: "Từ chối truy cập",
+      text: "Bạn phải đăng nhập.",
+      confirmButtonText: "OK"
+    }).then(() => {
+      window.location.href = "/auth.html";
+    });
     return false;
   }
+  return true;
 }
 
-function login() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
+// Hàm đăng xuất
+function logout() {
+  clearLogin();
+  window.location.href = "/auth.html";
+}
 
-  if (!username || !password) {
-    Swal.fire("Lỗi", "Vui lòng nhập tên đăng nhập và mật khẩu", "error");
-    return;
-  }
+// Xử lý sự kiện đăng nhập trên trang auth.html
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById("loginBtn");
+  if (!loginBtn) return; // Nếu không phải trang đăng nhập thì bỏ qua
 
-  const users = getRegisteredUsers();
-  const user = users.find(u => u.username === username);
+  loginBtn.addEventListener("click", async () => {
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value;
 
-  if (user) {
-    const hashedPassword = CryptoJS.SHA256(password).toString();
-    if (user.password === hashedPassword) {
-      saveCurrentUser({ username: user.username });
-      Swal.fire("Thành công", "Đăng nhập thành công!", "success").then(() => {
-        window.location.href = 'index.html';
-      });
-    } else {
-      Swal.fire("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng", "error");
+    if (!username || !password) {
+      Swal.fire("Lỗi", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu.", "warning");
+      return;
     }
-  } else {
-    Swal.fire("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng", "error");
-  }
-}
 
-function register() {
-  const username = document.getElementById("reg_username").value.trim();
-  const password = document.getElementById("reg_password").value.trim();
-  const confirm = document.getElementById("reg_confirm").value.trim();
+    try {
+      const response = await fetch(API_LOGIN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
 
-  if (!username || !password || !confirm) {
-    Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin", "error");
-    return;
-  }
-
-  if (password !== confirm) {
-    Swal.fire("Lỗi", "Mật khẩu không khớp", "error");
-    return;
-  }
-
-  const users = getRegisteredUsers();
-  if (users.find(u => u.username === username)) {
-    Swal.fire("Lỗi", "Tên đăng nhập đã tồn tại", "error");
-    return;
-  }
-
-  const hashedPassword = CryptoJS.SHA256(password).toString();
-  users.push({ username, password: hashedPassword });
-  saveRegisteredUsers(users);
-  Swal.fire("Thành công", "Đăng ký thành công!", "success").then(() => {
-    showLogin();
+      if (response.ok) {
+        setLoggedIn(username);
+        Swal.fire("Thành công", data.message, "success").then(() => {
+          window.location.href = "/index.html";
+        });
+      } else {
+        Swal.fire("Lỗi đăng nhập", data.message || "Đăng nhập thất bại", "error");
+      }
+    } catch (error) {
+      Swal.fire("Lỗi", "Không thể kết nối đến máy chủ.", "error");
+    }
   });
-}
-
-function showRegister() {
-  document.getElementById("loginForm").style.display = "none";
-  document.getElementById("registerForm").style.display = "block";
-}
-
-function showLogin() {
-  document.getElementById("loginForm").style.display = "block";
-  document.getElementById("registerForm").style.display = "none";
-}
-
-// Tự động chuyển hướng nếu đã đăng nhập trên trang login/register
-document.addEventListener('DOMContentLoaded', () => {
-  if (checkAuthStatus()) {
-    window.location.href = 'index.html';
-  }
 });
