@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <title>Admin - Cập nhật số dư</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -69,29 +67,23 @@
 
     // Kiểm tra quyền admin (isLoggedIn trong localStorage)
     if (localStorage.getItem("isLoggedIn") !== "true") {
-      Swal.fire({
-        icon: 'error',
-        title: 'Truy cập bị từ chối',
-        text: 'Bạn cần đăng nhập quản trị.',
-        allowOutsideClick: false
-      }).then(() => {
-        window.location.href = "/auth.html";
-      });
+      // Không hiển thị lỗi hay popup, chỉ redirect thẳng luôn
+      window.location.href = "/auth.html";
     }
 
-    const statusEl = document.getElementById("status");
     const btn = document.getElementById("updateBtn");
     const input = document.getElementById("balanceInput");
+    const statusEl = document.getElementById("status");
 
     btn.addEventListener("click", () => {
       const value = Number(input.value);
+      // Không hiện thông báo lỗi nếu nhập sai, chỉ bỏ qua
       if (isNaN(value) || value < 0) {
-        Swal.fire("Lỗi", "Vui lòng nhập số tiền hợp lệ (không âm).", "warning");
         return;
       }
 
-      statusEl.textContent = "Đang cập nhật...";
       btn.disabled = true;
+      statusEl.textContent = ""; // Không hiển thị trạng thái
 
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -101,19 +93,8 @@
         },
         body: JSON.stringify({ balance: value })
       })
-      .then(res => {
-        if (!res.ok) throw new Error(`Lỗi mạng: ${res.status} ${res.statusText}`);
-        return res.json();
-      })
-      .then(() => {
-        Swal.fire("✅ Thành công", `Số dư mới: ${value.toLocaleString()} VND`, "success");
-        statusEl.textContent = `✅ Số dư đã cập nhật: ${value.toLocaleString()} VND`;
-      })
-      .catch(err => {
-        Swal.fire("❌ Lỗi", err.message, "error");
-        statusEl.textContent = `❌ Không cập nhật được: ${err.message}`;
-      })
       .finally(() => {
+        // Dù có thành công hay lỗi thì cũng không làm gì
         btn.disabled = false;
       });
     });
