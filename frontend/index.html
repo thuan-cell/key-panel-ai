@@ -3,20 +3,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tạo mã kích hoạt</title>
-  <link rel="stylesheet" href="style.css"> <!-- Optional nếu có CSS ngoài -->
-  <!-- SweetAlert2 cho thông báo -->
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <!-- jQuery được sử dụng trong các hàm JS được cung cấp -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <!-- 
-    Dựa trên danh sách tệp được cung cấp (genkey.js, unified-auth.js),
-    hàm 'logout', xử lý logic xác thực,
-    lý tưởng nên được đặt trong 'unified-auth.js' để tổ chức mã tốt hơn.
-    Đảm bảo 'unified-auth.js' được bao gồm nếu nó chứa hàm logout.
-  -->
   <script defer src="genkey.js"></script>
-  <!-- Uncomment the line below if the authentication functions (including logout) are moved to unified-auth.js -->
-  <script defer src="unified-auth.js"></script> 
+  <script defer src="unified-auth.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -58,8 +49,7 @@
     }
     .history-button:hover { background: #2980b9; }
     .history-container {
-      display: none; /* Mặc định ẩn, được bật/tắt bởi nút */
-      margin-top: 0; text-align: left; max-height: 300px;
+      display: none; margin-top: 0; text-align: left; max-height: 300px;
       overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;
       padding: 15px; background-color: #f9f9f9;
       width: 100%; max-width: 450px;
@@ -77,21 +67,17 @@
       padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;
     }
     .clear-history:hover { background: #c0392b; }
-
-    /* Kiểu cho nút đăng xuất */
     #logoutBtn {
-        background: #e74c3c; /* Màu đỏ */
-        margin-top: 10px; /* Thêm khoảng trống phía trên */
+        background: #e74c3c;
+        margin-top: 10px;
     }
     #logoutBtn:hover {
-        background: #c0392b; /* Màu đỏ đậm hơn khi di chuột qua */
+        background: #c0392b;
     }
-    /* Đã xóa các kiểu cho form đăng nhập/đăng ký vì chúng không còn trong tệp này */
   </style>
 </head>
 <body>
-  <!-- Công cụ tạo mã kích hoạt -->
-  <div class="card" id="keyGenTool"> <!-- Removed style="display: none;" -->
+  <div class="card" id="keyGenTool">
     <h2>🔐 Công Cụ Tạo Mã Kích Hoạt</h2>
     <label for="serialInput">Serial (client gửi):</label>
     <input type="text" id="serialInput" placeholder="Nhập serial...">
@@ -100,12 +86,10 @@
     <button id="generateBtn">🎯 Tạo mã kích hoạt</button>
     <label for="result">Kết quả:</label>
     <textarea id="result" readonly></textarea>
-    <!-- Nút đăng xuất -->
-    <button id="logoutBtn" onclick="logout()">Đăng xuất</button> <!-- Removed style="display: none;" -->
+    <button id="logoutBtn" onclick="logout()">Đăng xuất</button>
   </div>
 
-  <!-- Phần lịch sử -->
-  <button class="history-button" onclick="toggleHistory()" id="historyToggleButton">📜 Lịch sử kích hoạt</button> <!-- Removed style="display: none;" -->
+  <button class="history-button" onclick="toggleHistory()" id="historyToggleButton">📜 Lịch sử kích hoạt</button>
   <div id="historyContainer" class="history-container">
     <h3>Lịch sử kích hoạt</h3>
     <div id="historyItems">Đang tải lịch sử...</div>
@@ -115,9 +99,8 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('DOMContentLoaded', () => {
       const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-      const isAdminActive = await (typeof checkAdminAccess === 'function' ? checkAdminAccess() : false);
 
       const generateButton = document.getElementById('generateBtn');
       const serialInput = document.getElementById('serialInput');
@@ -138,12 +121,11 @@
         [logoutButton, historyToggleButton].forEach(el => el && (el.style.display = ''));
       }
 
-      console.log("🛂 Auth Check:", { isLoggedIn, isAdminActive });
-
-      if (!isLoggedIn || !isAdminActive) {
+      if (!isLoggedIn) {
         disableUI();
-        await Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập và được admin cấp quyền.", "error");
-        window.location.href = "/auth.html";
+        Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
+          window.location.href = "/auth.html";
+        });
         return;
       }
 
