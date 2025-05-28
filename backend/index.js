@@ -1,5 +1,3 @@
-// ✅ Backend KHÔNG dùng file admin.json nữa - Lưu tạm trạng thái admin trong RAM
-
 const express = require("express");
 const cors = require("cors");
 const fs = require("fs").promises;
@@ -11,24 +9,21 @@ const PORT = process.env.PORT || 3000;
 const IS_RENDER = process.env.RENDER === "true";
 const USERS_FILE = IS_RENDER ? path.join("/tmp", "users.json") : path.join(__dirname, "users.json");
 
-console.log("\ud83d\udd27 USERS_FILE:", USERS_FILE);
+console.log("📁 USERS_FILE:", USERS_FILE);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(__dirname, "../frontend")));
 
-// === Biến RAM lưu tạm trạng thái admin ===
-let adminGranted = false;
-
-// === Đọc / ghi user ===
+// === Xử lý users.json ===
 async function readUsers() {
   try {
     const data = await fs.readFile(USERS_FILE, "utf-8");
     return JSON.parse(data);
   } catch (err) {
     if (err.code === "ENOENT") return [];
-    console.error("\u274c Lỗi đọc user:", err);
+    console.error("❌ Lỗi đọc user:", err);
     throw err;
   }
 }
@@ -37,7 +32,7 @@ async function writeUsers(users) {
   try {
     await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
   } catch (err) {
-    console.error("\u274c Lỗi ghi user:", err);
+    console.error("❌ Lỗi ghi user:", err);
     throw err;
   }
 }
@@ -85,23 +80,37 @@ app.get("/api/users", async (req, res) => {
   }
 });
 
-// === Quản lý trạng thái admin ===
-app.post("/api/grant-access", (req, res) => {
-  adminGranted = true;
-  console.log("\u2705 Admin đã cấp quyền");
+// === API quản lý trạng thái admin thông qua users.json ===
+app.post("/api/grant-access", async (req, res) => {
+  const users = await readUsers();
+  const adminUser = users.find(u => u.username === "admin");
+  if (!adminUser) return res.status(400).json({ message: "Không tìm thấy admin" });
+
+  adminUser.adminGranted = true;
+  await writeUsers(users);
+  console.log("✅ Admin đã cấp quyền");
   res.status(200).json({ success: true });
 });
 
-app.post("/api/revoke-access", (req, res) => {
-  adminGranted = false;
-  console.log("\u274c Admin đã thu hồi quyền");
+app.post("/api/revoke-access", async (req, res) => {
+  const users = await readUsers();
+  const adminUser = users.find(u => u.username === "admin");
+  if (!adminUser) return res.status(400).json({ message: "Không tìm thấy admin" });
+
+  adminUser.adminGranted = false;
+  await writeUsers(users);
+  console.log("🚫 Admin đã thu hồi quyền");
   res.status(200).json({ success: true });
 });
 
-app.get("/api/access-status", (req, res) => {
-  res.status(200).json({ admin_granted: adminGranted });
+app.get("/api/access-status", async (req, res) => {
+  const users = await readUsers();
+  const adminUser = users.find(u => u.username === "admin");
+  const granted = adminUser?.adminGranted === true;
+  res.status(200).json({ admin_granted: granted });
 });
 
+// === Start server ===
 app.listen(PORT, () => {
-  console.log(`\ud83c\udf10 Server chạy: http://localhost:${PORT}`);
+  console.log(`🌐 Server đang chạy tại: http://localhost:${PORT}`);
 });
