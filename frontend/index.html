@@ -117,14 +117,7 @@
       generateButton.disabled = false;
     }
 
-    // Check login status
-    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-    if (!isLoggedIn) {
-      Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
-        window.location.href = "/auth.html";
-      });
-      return;
-    }
+    
 
     // Kiểm tra số dư
     const BIN_ID = "683709868561e97a501c9633";
