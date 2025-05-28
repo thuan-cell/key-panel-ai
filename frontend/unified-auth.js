@@ -101,7 +101,7 @@ function login() {
       saveCurrentUser({ username: foundUser.username });
       Swal.fire("Thành công", "Đăng nhập thành công!", "success").then(() => {
         // Chuyển hướng đến trang chính sau khi đăng nhập thành công
-        window.location.href = 'https://key-panel-aihtml1.onrender.com/';
+        window.location.href = 'https://genkey-ai.onrender.com/index.html';
       });
     } else {
       // Mật khẩu không khớp
@@ -179,7 +179,7 @@ function logout() {
   removeCurrentUser();
   Swal.fire("Thông báo", "Đăng xuất thành công!", "info").then(() => {
     // Chuyển hướng về trang đăng nhập/đăng ký sau khi đăng xuất
-    window.location.href = 'https://genkey-ai.onrender.com/index.html';
+    window.location.href = 'https://genkey-ai.onrender.com/auth.html';
   });
 }
 
