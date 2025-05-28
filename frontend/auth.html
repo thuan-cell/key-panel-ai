@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
   <title>Đăng nhập / Đăng ký</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Thư viện -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
   <!-- Giao diện -->
   <style>
     body {
@@ -67,32 +65,31 @@
     <div id="loginForm">
       <h2>Đăng nhập</h2>
       <div class="input-group">
-        <input type="text" id="username" placeholder="Tên đăng nhập">
+        <input type="text" id="username" placeholder="Tên đăng nhập" />
       </div>
       <div class="input-group">
-        <input type="password" id="password" placeholder="Mật khẩu">
+        <input type="password" id="password" placeholder="Mật khẩu" />
       </div>
       <button onclick="login()" class="btn">Đăng nhập</button>
       <div class="toggle-link">Chưa có tài khoản? <a onclick="showRegister()">Đăng ký</a></div>
     </div>
 
-    <div id="registerForm" style="display:none;">
+    <div id="registerForm" style="display: none;">
       <h2>Đăng ký</h2>
       <div class="input-group">
-        <input type="text" id="reg_username" placeholder="Tên đăng nhập">
+        <input type="text" id="reg_username" placeholder="Tên đăng nhập" />
       </div>
       <div class="input-group">
-        <input type="password" id="reg_password" placeholder="Mật khẩu">
+        <input type="password" id="reg_password" placeholder="Mật khẩu" />
       </div>
       <div class="input-group">
-        <input type="password" id="reg_confirm" placeholder="Nhập lại mật khẩu">
+        <input type="password" id="reg_confirm" placeholder="Nhập lại mật khẩu" />
       </div>
       <button onclick="register()" class="btn">Tạo tài khoản</button>
       <div class="toggle-link">Đã có tài khoản? <a onclick="showLogin()">Đăng nhập</a></div>
     </div>
   </div>
 
-  <!-- Script chính -->
-  <script src="auth.js"></script>
+  <script src="unified-auth.js"></script>
 </body>
 </html>

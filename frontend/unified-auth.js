@@ -51,7 +51,7 @@ function login() {
     if (user.password === hashedPassword) {
       saveCurrentUser({ username: user.username });
       Swal.fire("Thành công", "Đăng nhập thành công!", "success").then(() => {
-        window.location.href = 'https://genkey-ai.onrender.com/index.html';
+        window.location.href = 'index.html';
       });
     } else {
       Swal.fire("Lỗi", "Tên đăng nhập hoặc mật khẩu không đúng", "error");
