@@ -6,13 +6,14 @@ function adminLogin() {
   if (username === "admin" && password === "admin123") {
     fetch("/api/grant-access", { method: "POST" })
       .then(() => {
-        Swal.fire("Thành công", "Quyền đã cấp!", "success")
+        Swal.fire("Thành công", "Đã cấp quyền truy cập!", "success")
           .then(() => window.location.href = "/index.html");
       });
   } else {
     Swal.fire("Lỗi", "Sai tài khoản hoặc mật khẩu!", "error");
   }
 }
+
 
 // Đăng xuất admin → Thu hồi quyền truy cập toàn cục
 function adminLogout() {
