@@ -2,88 +2,77 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Admin - Cập nhật số dư</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cập nhật số dư (Độc lập)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f2f2f2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       margin: 0;
     }
+    .container {
+      background: white;
+      padding: 24px 32px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 300px;
+    }
     h2 {
-      color: #333;
       margin-bottom: 20px;
+      color: #333;
     }
     input[type=number] {
+      width: 100%;
       padding: 12px;
-      width: 260px;
-      margin-bottom: 15px;
       font-size: 1rem;
+      margin-bottom: 16px;
       border-radius: 8px;
       border: 1px solid #ccc;
       outline-offset: 2px;
+      box-sizing: border-box;
     }
     button {
-      padding: 12px 30px;
-      font-size: 1rem;
+      padding: 12px 0;
+      width: 100%;
       background-color: #43cea2;
       color: white;
+      font-size: 1rem;
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s;
     }
     button:hover {
       background-color: #36b996;
     }
-    #status {
-      margin-top: 20px;
-      font-weight: 600;
-      color: #444;
-      min-height: 24px;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
-
-  <h2>🔐 Cập nhật số dư</h2>
-
-  <input id="balanceInput" type="number" placeholder="Nhập số tiền..." min="0" step="1" />
-
-  <button id="updateBtn">Cập nhật</button>
-
-  <p id="status"></p>
+  <div class="container">
+    <h2>Cập nhật số dư</h2>
+    <input id="balanceInput" type="number" placeholder="Nhập số tiền..." min="0" step="1" />
+    <button id="updateBtn">Cập nhật</button>
+  </div>
 
   <script>
-    // Config
     const BIN_ID = "683709868561e97a501c9633";
     const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
 
-    // Kiểm tra quyền admin (isLoggedIn trong localStorage)
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      // Không hiển thị lỗi hay popup, chỉ redirect thẳng luôn
-      window.location.href = "/auth.html";
-    }
-
     const btn = document.getElementById("updateBtn");
     const input = document.getElementById("balanceInput");
-    const statusEl = document.getElementById("status");
 
     btn.addEventListener("click", () => {
       const value = Number(input.value);
-      // Không hiện thông báo lỗi nếu nhập sai, chỉ bỏ qua
       if (isNaN(value) || value < 0) {
+        // Không làm gì nếu nhập sai
         return;
       }
-
       btn.disabled = true;
-      statusEl.textContent = ""; // Không hiển thị trạng thái
 
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -94,7 +83,6 @@
         body: JSON.stringify({ balance: value })
       })
       .finally(() => {
-        // Dù có thành công hay lỗi thì cũng không làm gì
         btn.disabled = false;
       });
     });
