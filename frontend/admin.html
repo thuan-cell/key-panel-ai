@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Admin - Cập nhật số dư</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     body {
@@ -13,63 +13,85 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 80px;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
     }
     h2 {
       color: #333;
+      margin-bottom: 20px;
     }
-    input {
+    input[type=number] {
       padding: 12px;
-      width: 250px;
-      margin: 10px 0;
+      width: 260px;
+      margin-bottom: 15px;
       font-size: 1rem;
       border-radius: 8px;
       border: 1px solid #ccc;
+      outline-offset: 2px;
     }
     button {
-      padding: 12px 20px;
+      padding: 12px 30px;
       font-size: 1rem;
       background-color: #43cea2;
       color: white;
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #36b996;
     }
     #status {
       margin-top: 20px;
-      font-weight: bold;
+      font-weight: 600;
       color: #444;
+      min-height: 24px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
+
   <h2>🔐 Cập nhật số dư</h2>
-  <input type="number" id="balanceInput" placeholder="Nhập số tiền..."/>
-  <button onclick="updateBalance()">Cập nhật</button>
+
+  <input id="balanceInput" type="number" placeholder="Nhập số tiền..." min="0" step="1" />
+
+  <button id="updateBtn">Cập nhật</button>
+
   <p id="status"></p>
 
   <script>
+    // Config
     const BIN_ID = "683709868561e97a501c9633";
     const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
 
-    // Kiểm tra quyền admin
+    // Kiểm tra quyền admin (isLoggedIn trong localStorage)
     if (localStorage.getItem("isLoggedIn") !== "true") {
-      Swal.fire("Truy cập bị từ chối", "Bạn cần đăng nhập quản trị.", "error")
-        .then(() => {
-          window.location.href = "/auth.html";
-        });
+      Swal.fire({
+        icon: 'error',
+        title: 'Truy cập bị từ chối',
+        text: 'Bạn cần đăng nhập quản trị.',
+        allowOutsideClick: false
+      }).then(() => {
+        window.location.href = "/auth.html";
+      });
     }
 
-    function updateBalance() {
-      const value = Number(document.getElementById('balanceInput').value);
+    const statusEl = document.getElementById("status");
+    const btn = document.getElementById("updateBtn");
+    const input = document.getElementById("balanceInput");
 
+    btn.addEventListener("click", () => {
+      const value = Number(input.value);
       if (isNaN(value) || value < 0) {
-        Swal.fire("Lỗi", "Vui lòng nhập số hợp lệ.", "warning");
+        Swal.fire("Lỗi", "Vui lòng nhập số tiền hợp lệ (không âm).", "warning");
         return;
       }
+
+      statusEl.textContent = "Đang cập nhật...";
+      btn.disabled = true;
 
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
@@ -80,18 +102,21 @@
         body: JSON.stringify({ balance: value })
       })
       .then(res => {
-        if (!res.ok) throw new Error("Không thể cập nhật.");
+        if (!res.ok) throw new Error(`Lỗi mạng: ${res.status} ${res.statusText}`);
         return res.json();
       })
       .then(() => {
         Swal.fire("✅ Thành công", `Số dư mới: ${value.toLocaleString()} VND`, "success");
-        document.getElementById('status').innerText = `✅ Số dư đã cập nhật: ${value.toLocaleString()} VND`;
+        statusEl.textContent = `✅ Số dư đã cập nhật: ${value.toLocaleString()} VND`;
       })
       .catch(err => {
         Swal.fire("❌ Lỗi", err.message, "error");
-        document.getElementById('status').innerText = `❌ Không cập nhật được: ${err.message}`;
+        statusEl.textContent = `❌ Không cập nhật được: ${err.message}`;
+      })
+      .finally(() => {
+        btn.disabled = false;
       });
-    }
+    });
   </script>
 </body>
 </html>
