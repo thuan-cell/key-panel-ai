@@ -1,5 +1,6 @@
 const REGISTERED_USERS_STORAGE_KEY = 'registeredUsers';
 const CURRENT_USER_STORAGE_KEY = 'currentUser';
+const ADMIN_GRANTED_KEY = 'admin_granted';
 
 // Lấy danh sách người dùng từ Local Storage
 function getRegisteredUsers() {
@@ -22,7 +23,7 @@ function saveRegisteredUsers(users) {
   }
 }
 
-// Lưu thông tin người dùng đang đăng nhập
+// Lưu người dùng đang đăng nhập
 function saveCurrentUser(user) {
   try {
     if (user && user.password) delete user.password;
@@ -33,7 +34,7 @@ function saveCurrentUser(user) {
   }
 }
 
-// Xoá thông tin người dùng đang đăng nhập
+// Xoá thông tin người dùng đăng nhập
 function removeCurrentUser() {
   localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
 }
@@ -48,7 +49,7 @@ function checkAuthStatus() {
   }
 }
 
-// Hàm đăng nhập
+// Đăng nhập
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -72,7 +73,7 @@ function login() {
   }
 }
 
-// Hàm đăng ký
+// Đăng ký
 function register() {
   if (typeof $ === 'undefined' || typeof CryptoJS === 'undefined') {
     Swal.fire("Lỗi", "Thư viện cần thiết chưa được tải", "error");
@@ -109,39 +110,38 @@ function register() {
   });
 }
 
-// Hàm đăng xuất
+// Đăng xuất
 function logout() {
   removeCurrentUser();
-  localStorage.removeItem("admin_granted");
+  localStorage.removeItem(ADMIN_GRANTED_KEY);
   Swal.fire("Thông báo", "Đăng xuất thành công!", "info").then(() => {
     window.location.href = '/auth.html';
   });
 }
 
-// Hiển thị form đăng ký / đăng nhập
+// Hiển thị form
 function showRegister() {
   $("#loginForm").hide();
   $("#registerForm").show();
 }
-
 function showLogin() {
   $("#registerForm").hide();
   $("#loginForm").show();
 }
 
-// 🔐 Kiểm tra quyền admin từ backend → lưu vào localStorage nếu có
+// 🔐 Kiểm tra quyền admin → lưu localStorage
 async function checkAdminAccess() {
   try {
     const res = await fetch("/api/access-status");
-    if (!res.ok) throw new Error("Lỗi từ server");
+    if (!res.ok) throw new Error("Lỗi truy vấn server");
     const data = await res.json();
 
     const granted = !!data.admin_granted;
-    localStorage.setItem("admin_granted", granted ? "true" : "false");
+    localStorage.setItem(ADMIN_GRANTED_KEY, granted ? "true" : "false");
     return granted;
   } catch (e) {
     console.error("❌ Lỗi kiểm tra quyền admin:", e);
-    localStorage.setItem("admin_granted", "false");
+    localStorage.setItem(ADMIN_GRANTED_KEY, "false");
     return false;
   }
 }
