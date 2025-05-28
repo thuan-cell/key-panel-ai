@@ -115,56 +115,78 @@
   </div>
 
  <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-    const isAdminGranted = localStorage.getItem("admin_granted") === "true";
+document.addEventListener('DOMContentLoaded', function () {
+  const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
 
-    const generateButton = document.getElementById('generateBtn');
-    const serialInput = document.getElementById('serialInput');
-    const expireInput = document.getElementById('expireInput');
-    const resultTextarea = document.getElementById('result');
-    const logoutButton = document.getElementById('logoutBtn');
-    const historyToggleButton = document.getElementById('historyToggleButton');
-    const historyContainer = document.getElementById('historyContainer');
+  const generateButton = document.getElementById('generateBtn');
+  const serialInput = document.getElementById('serialInput');
+  const expireInput = document.getElementById('expireInput');
+  const resultTextarea = document.getElementById('result');
+  const logoutButton = document.getElementById('logoutBtn');
+  const historyToggleButton = document.getElementById('historyToggleButton');
+  const historyContainer = document.getElementById('historyContainer');
 
-    function disableUI() {
-      generateButton.disabled = true;
-      serialInput.disabled = true;
-      expireInput.disabled = true;
-      resultTextarea.disabled = true;
-      logoutButton.style.display = 'none';
-      historyToggleButton.style.display = 'none';
-      historyContainer.style.display = 'none';
-    }
+  function disableUI() {
+    if (generateButton) generateButton.disabled = true;
+    if (serialInput) serialInput.disabled = true;
+    if (expireInput) expireInput.disabled = true;
+    if (resultTextarea) resultTextarea.disabled = true;
+    if (logoutButton) logoutButton.style.display = 'none';
+    if (historyToggleButton) historyToggleButton.style.display = 'none';
+    if (historyContainer) historyContainer.style.display = 'none';
+  }
 
-    function enableUI() {
-      generateButton.disabled = false;
-      serialInput.disabled = false;
-      expireInput.disabled = false;
-      resultTextarea.disabled = false;
-      logoutButton.style.display = '';
-      historyToggleButton.style.display = '';
-    }
+  function enableUI() {
+    if (generateButton) generateButton.disabled = false;
+    if (serialInput) serialInput.disabled = false;
+    if (expireInput) expireInput.disabled = false;
+    if (resultTextarea) resultTextarea.disabled = false;
+    if (logoutButton) logoutButton.style.display = '';
+    if (historyToggleButton) historyToggleButton.style.display = '';
+  }
 
-    if (!isLoggedIn) {
-      disableUI();
-      Swal.fire("Chưa đăng nhập", "Vui lòng đăng nhập để tiếp tục.", "warning")
-        .then(() => window.location.href = "auth.html");
-      return;
-    }
+  if (!isLoggedIn) {
+    disableUI();
+    return;
+  }
 
-    if (!isAdminGranted) {
-      disableUI();
-      Swal.fire("Từ chối truy cập", "Admin chưa cấp quyền truy cập.", "error")
-        .then(() => window.location.href = "auth.html");
-      return;
-    }
+  // 🔐 Gửi request đến server kiểm tra quyền admin
+  fetch("/api/access-status")
+    .then(res => res.ok ? res.json() : Promise.reject())
+    .then(data => {
+      if (data.admin_granted) {
+        enableUI();
+      } else {
+        Swal.fire("Từ chối truy cập", "Admin chưa cấp quyền truy cập.", "warning")
+          .then(() => {
+            disableUI();
+            window.location.href = "auth.html";
+          });
+      }
+    })
+    .catch(() => {
+      Swal.fire("Lỗi", "Không thể kiểm tra quyền truy cập từ server!", "error")
+        .then(() => {
+          disableUI();
+          window.location.href = "auth.html";
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', async () => {
+  const isLoggedIn = checkAuthStatus();
+  const isAdminActive = await checkAdminAccess();
 
-    enableUI(); // ✅ OK
-  });
+  if (!isLoggedIn || !isAdminActive) {
+    Swal.fire("Từ chối truy cập", "Vui lòng đăng nhập và đợi admin cấp quyền!", "error")
+      .then(() => window.location.href = "/auth.html");
+    return;
+  }
+
+  // ✅ Cho phép truy cập
+  enableAllUI();
+});
+
 </script>
-
-
 
 
 
