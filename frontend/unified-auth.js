@@ -89,3 +89,31 @@ function logout() {
     window.location.href = 'https://genkey-ai.onrender.com/auth.html';
   });
 }
+function register() {
+  const username = document.getElementById("reg_username").value.trim();
+  const password = document.getElementById("reg_password").value.trim();
+  const confirm = document.getElementById("reg_confirm").value.trim();
+
+  if (!username || !password || !confirm) {
+    Swal.fire("Lỗi", "Vui lòng nhập đầy đủ thông tin", "error");
+    return;
+  }
+
+  if (password !== confirm) {
+    Swal.fire("Lỗi", "Mật khẩu không khớp", "error");
+    return;
+  }
+
+  const users = getRegisteredUsers();
+  if (users.find(u => u.username === username)) {
+    Swal.fire("Lỗi", "Tên đăng nhập đã tồn tại", "error");
+    return;
+  }
+
+  const hashedPassword = CryptoJS.SHA256(password).toString();
+  users.push({ username, password: hashedPassword });
+  saveRegisteredUsers(users);
+  Swal.fire("Thành công", "Đăng ký thành công!", "success").then(() => {
+    showLogin();
+  });
+}
