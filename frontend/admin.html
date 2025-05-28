@@ -1,12 +1,53 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Admin - Cập nhật số dư</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 80px;
+    }
+    h2 {
+      color: #333;
+    }
+    input {
+      padding: 12px;
+      width: 250px;
+      margin: 10px 0;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 12px 20px;
+      font-size: 1rem;
+      background-color: #43cea2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #36b996;
+    }
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #444;
+    }
+  </style>
 </head>
 <body>
-  <h2>🔐 Nhập số dư (VD: 50000)</h2>
-  <input type="number" id="balanceInput" placeholder="Nhập số tiền..." />
+  <h2>🔐 Cập nhật số dư</h2>
+  <input type="number" id="balanceInput" placeholder="Nhập số tiền..."/>
   <button onclick="updateBalance()">Cập nhật</button>
   <p id="status"></p>
 
@@ -14,8 +55,22 @@
     const BIN_ID = "683709868561e97a501c9633";
     const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
 
+    // Kiểm tra quyền admin
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      Swal.fire("Truy cập bị từ chối", "Bạn cần đăng nhập quản trị.", "error")
+        .then(() => {
+          window.location.href = "/auth.html";
+        });
+    }
+
     function updateBalance() {
       const value = Number(document.getElementById('balanceInput').value);
+
+      if (isNaN(value) || value < 0) {
+        Swal.fire("Lỗi", "Vui lòng nhập số hợp lệ.", "warning");
+        return;
+      }
+
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
         method: 'PUT',
         headers: {
@@ -24,12 +79,17 @@
         },
         body: JSON.stringify({ balance: value })
       })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById('status').innerText = '✅ Cập nhật thành công! Số dư mới: ' + value;
+      .then(res => {
+        if (!res.ok) throw new Error("Không thể cập nhật.");
+        return res.json();
+      })
+      .then(() => {
+        Swal.fire("✅ Thành công", `Số dư mới: ${value.toLocaleString()} VND`, "success");
+        document.getElementById('status').innerText = `✅ Số dư đã cập nhật: ${value.toLocaleString()} VND`;
       })
       .catch(err => {
-        document.getElementById('status').innerText = '❌ Lỗi: ' + err.message;
+        Swal.fire("❌ Lỗi", err.message, "error");
+        document.getElementById('status').innerText = `❌ Không cập nhật được: ${err.message}`;
       });
     }
   </script>

@@ -22,8 +22,13 @@ function saveRegisteredUsers(users) {
 
 function saveCurrentUser(user) {
   try {
-    if (user && user.password) delete user.password;
-    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(user));
+    if (!user) {
+      localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+      return;
+    }
+    const userCopy = { ...user };
+    if (userCopy.password) delete userCopy.password;
+    localStorage.setItem(CURRENT_USER_STORAGE_KEY, JSON.stringify(userCopy));
   } catch (e) {
     console.error("Lỗi lưu người dùng đăng nhập:", e);
     Swal.fire("Lỗi", "Không thể lưu thông tin đăng nhập.", "error");
@@ -32,6 +37,18 @@ function saveCurrentUser(user) {
 
 function removeCurrentUser() {
   localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
+}
+
+function checkAuthStatus() {
+  try {
+    const currentUserStr = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
+    if (!currentUserStr) return false;
+    const currentUser = JSON.parse(currentUserStr);
+    return currentUser && currentUser.username;
+  } catch (e) {
+    console.error('Lỗi kiểm tra đăng nhập:', e);
+    return false;
+  }
 }
 
 function login() {
@@ -99,3 +116,10 @@ function showLogin() {
   document.getElementById("loginForm").style.display = "block";
   document.getElementById("registerForm").style.display = "none";
 }
+
+// Tự động chuyển hướng nếu đã đăng nhập trên trang login/register
+document.addEventListener('DOMContentLoaded', () => {
+  if (checkAuthStatus()) {
+    window.location.href = 'index.html';
+  }
+});
