@@ -115,7 +115,10 @@
   </div>
 
  <script>
-  document.addEventListener('DOMContentLoaded', async () => {
+  document.addEventListener('DOMContentLoaded', function () {
+    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
+    const isAdminGranted = localStorage.getItem("admin_granted") === "true";
+
     const generateButton = document.getElementById('generateBtn');
     const serialInput = document.getElementById('serialInput');
     const expireInput = document.getElementById('expireInput');
@@ -143,7 +146,6 @@
       historyToggleButton.style.display = '';
     }
 
-    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
     if (!isLoggedIn) {
       disableUI();
       Swal.fire("Chưa đăng nhập", "Vui lòng đăng nhập để tiếp tục.", "warning")
@@ -151,28 +153,17 @@
       return;
     }
 
-    const isAdminGranted = typeof checkAdminAccess === 'function' ? await checkAdminAccess() : false;
-    if (isAdminGranted) {
-      enableUI();
-    } else {
+    if (!isAdminGranted) {
       disableUI();
       Swal.fire("Từ chối truy cập", "Admin chưa cấp quyền truy cập.", "error")
         .then(() => window.location.href = "auth.html");
+      return;
     }
-  });
-  async function checkAdminAccess() {
-  try {
-    const response = await fetch("https://key-panel-ai3.onrender.com/api/access-status");
-    if (!response.ok) throw new Error("Không thể kiểm tra trạng thái admin");
-    const data = await response.json();
-    return data.admin_granted === true;
-  } catch (err) {
-    console.error("Lỗi kiểm tra quyền admin:", err);
-    return false;
-  }
-}
 
+    enableUI(); // ✅ OK
+  });
 </script>
+
 
 
 
