@@ -160,6 +160,18 @@
         .then(() => window.location.href = "auth.html");
     }
   });
+  async function checkAdminAccess() {
+  try {
+    const response = await fetch("https://key-panel-ai3.onrender.com/api/access-status");
+    if (!response.ok) throw new Error("Không thể kiểm tra trạng thái admin");
+    const data = await response.json();
+    return data.admin_granted === true;
+  } catch (err) {
+    console.error("Lỗi kiểm tra quyền admin:", err);
+    return false;
+  }
+}
+
 </script>
 
 
