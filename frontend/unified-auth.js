@@ -194,3 +194,14 @@ function showLogin() {
   $("#registerForm").hide();
   $("#loginForm").show();
 }
+// Hàm kiểm tra quyền admin toàn cục từ backend (RAM)
+async function checkAdminAccess() {
+  try {
+    const response = await fetch("/api/access-status");
+    const data = await response.json();
+    return data.admin_granted === true;
+  } catch (e) {
+    console.error("Lỗi kiểm tra quyền admin:", e);
+    return false;
+  }
+}
