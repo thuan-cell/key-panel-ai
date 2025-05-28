@@ -9,6 +9,7 @@
   <script defer src="genkey.js"></script>
   <script defer src="unified-auth.js"></script>
   <style>
+    /* giữ nguyên style cũ */
     * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
@@ -38,7 +39,7 @@
       border: none; border-radius: 10px;
       cursor: pointer; transition: background 0.3s ease; margin-bottom: 15px;
     }
-    button:hover { background: #3b3fbd; }
+    button:hover:not(:disabled) { background: #3b3fbd; }
     button:disabled {
         background: #cccccc;
         cursor: not-allowed;
@@ -98,63 +99,57 @@
     </div>
   </div>
 
-  <script>document.addEventListener('DOMContentLoaded', () => {
-  const generateButton = document.getElementById('generateBtn');
-  const serialInput = document.getElementById('serialInput');
-  const expireInput = document.getElementById('expireInput');
-  const resultTextarea = document.getElementById('result');
-  const logoutButton = document.getElementById('logoutBtn');
-  const historyToggleButton = document.getElementById('historyToggleButton');
-  const historyContainer = document.getElementById('historyContainer');
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const generateButton = document.getElementById('generateBtn');
+    const serialInput = document.getElementById('serialInput');
+    const expireInput = document.getElementById('expireInput');
+    const resultTextarea = document.getElementById('result');
+    const logoutButton = document.getElementById('logoutBtn');
+    const historyToggleButton = document.getElementById('historyToggleButton');
+    const historyContainer = document.getElementById('historyContainer');
 
-  function disableUI() {
-    [generateButton, serialInput, expireInput, resultTextarea].forEach(el => el && (el.disabled = true));
-    [logoutButton, historyToggleButton].forEach(el => el && (el.style.display = 'none'));
-    if (historyContainer) historyContainer.style.display = 'none';
-  }
+    // Hàm disable chỉ khóa nút tạo mã, không ẩn các thành phần khác
+    function disableGenerate() {
+      generateButton.disabled = true;
+    }
+    function enableGenerate() {
+      generateButton.disabled = false;
+    }
 
-  function enableUI() {
-    [generateButton, serialInput, expireInput, resultTextarea].forEach(el => el && (el.disabled = false));
-    [logoutButton, historyToggleButton].forEach(el => el && (el.style.display = ''));
-    if (historyContainer) historyContainer.style.display = '';
-  }
+    // Check login status
+    const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
+    if (!isLoggedIn) {
+      Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
+        window.location.href = "/auth.html";
+      });
+      return;
+    }
 
-  // Check login status
-  const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-  if (!isLoggedIn) {
-    disableUI();
-    Swal.fire("Từ chối truy cập", "Bạn phải đăng nhập.", "error").then(() => {
-      window.location.href = "/auth.html";
+    // Kiểm tra số dư
+    const BIN_ID = "683709868561e97a501c9633";
+    const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
+
+    fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      headers: {
+        'X-Master-Key': API_KEY
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      const balance = data.record.balance;
+      if (balance < 50000) {
+        Swal.fire("Không đủ số dư", "Không thể tạo key. Vui lòng liên hệ admin.", "warning");
+        disableGenerate();
+      } else {
+        enableGenerate();
+      }
+    })
+    .catch(() => {
+      Swal.fire("Lỗi", "Không thể kiểm tra số dư từ máy chủ", "error");
+      disableGenerate();
     });
-    return;
-  }
-
-  // Check balance before enabling UI
-  const BIN_ID = "683709868561e97a501c9633";
-  const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
-
-  fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-    headers: {
-      'X-Master-Key': API_KEY
-    }
-  })
-  .then(res => res.json())
-  .then(data => {
-    const balance = data.record.balance;
-    if (balance < 50000) {
-      Swal.fire("Không đủ số dư", "Không thể tạo key. Vui lòng liên hệ admin.", "error");
-      disableUI();
-    } else {
-      enableUI();
-    }
-  })
-  .catch(() => {
-    Swal.fire("Lỗi", "Không thể kiểm tra số dư từ máy chủ", "error");
-    disableUI();
   });
-});
-
-</script>
-
+  </script>
 </body>
 </html>
