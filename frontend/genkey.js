@@ -1,121 +1,53 @@
 
-const BACKEND_URL = "https://key-panel-ai3.onrender.com";
-const MIN_BALANCE = 50000;
-const STORE_SECRET_KEY = "*45GtrpQY8hzL9alhfjkshjdgsdjhiufbv_XZ$!@^&*()+|[]{}<>~l5eWJ@PgfaM#casjskdlj80y8907851uhkggbOPw1Fkc41t%z5a^dfg&hjk3";
-
-
-function checksum(str) {
-  let a = 1, c = 0;
-  if (!str) return a;
-  a = 0;
-  for (let h = str.length - 1; h >= 0; h--) {
-    let o = str.charCodeAt(h);
-    a = (a << 6 & 268435455) + o + (o << 14);
-    c = a & 266338304;
-    if (c !== 0) a ^= c >> 21;
-  }
-  return String(a);
-}
-
-function strToHex(str) {
-  return Array.from(str).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-}
-
-function encrypt(data, salt) {
-  return strToHex(Array.from(data).map((c, i) =>
-    String.fromCharCode(c.charCodeAt(0) ^ salt.charCodeAt(i % salt.length))
-  ).join(''));
-}
-
-function generateCode() {
-  const serial = document.getElementById("serialInput").value.trim();
-  const expireDate = document.getElementById("expireInput").value;
-
-  if (!serial || !expireDate) {
-    alert("Vui lòng nhập Serial và ngày hết hạn!");
-    return;
-  }
-
-  const checksumCode = checksum(serial);
-  const expireTimestamp = Math.floor(new Date(expireDate).getTime() / 1000);
-  const raw = `${checksumCode}|${expireTimestamp}`;
-  const encrypted = encrypt(raw, STORE_SECRET_KEY);
-
-  document.getElementById("result").value = encrypted;
-
-  saveActivationToHistory({
-    inputString: serial,
-    licenseKey: encrypted,
-    remainingBalance: null,
-    transactionCode: null
-  });
-}
-
-function saveActivationToHistory(data) {
-  let activationHistory = JSON.parse(localStorage.getItem('activationHistory')) || [];
-  const historyItem = {
-    inputString: data.inputString,
-    licenseKey: data.licenseKey,
-    timestamp: data.timestamp || Math.floor(Date.now() / 1000),
-    remainingBalance: data.remainingBalance,
-    transactionCode: data.transactionCode || generateRandomId()
-  };
-  activationHistory.unshift(historyItem);
-  if (activationHistory.length > 50) {
-    activationHistory = activationHistory.slice(0, 50);
-  }
-  localStorage.setItem('activationHistory', JSON.stringify(activationHistory));
-
-  if (document.getElementById('historyContainer').style.display === 'block') {
-    loadActivationHistory();
-  }
-}
-
-function generateRandomId() {
-  return Math.random().toString(36).substring(2, 10);
-}
-
-function loadActivationHistory() {
-  const historyItems = document.getElementById('historyItems');
-  const activationHistory = JSON.parse(localStorage.getItem('activationHistory')) || [];
-  historyItems.innerHTML = '';
-  if (activationHistory.length === 0) {
-    historyItems.innerHTML = '<p>Chưa có lịch sử kích hoạt nào.</p>';
-    return;
-  }
-
-  activationHistory.forEach(item => {
-    const date = new Date(item.timestamp * 1000).toLocaleString('vi-VN');
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.innerHTML = `
-      <div class="date">📅 ${date}</div>
-      <div class="input">🔖 Chuỗi nhập: ${item.inputString}</div>
-      <div class="key">🔑 Khóa: ${item.licenseKey}</div>
-    `;
-    historyItems.appendChild(div);
-  });
-}
-
-function toggleHistory() {
-  const container = document.getElementById('historyContainer');
-  if (container.style.display === 'block') {
-    container.style.display = 'none';
-  } else {
-    container.style.display = 'block';
-    loadActivationHistory();
-  }
-}
-
-function clearHistory() {
-  if (confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử kích hoạt?')) {
-    localStorage.removeItem('activationHistory');
-    loadActivationHistory();
-  }
-}
-
-// Tự động gán nút tạo key nếu dùng addEventListener thay vì onclick trong HTML
+// File: frontend/genkey.js
+/*
+  Script cho trang genkey.html.
+  Kiểm tra trạng thái admin từ backend định kỳ.
+  Kích hoạt hoặc vô hiệu hóa nút "Tạo Key" dựa trên trạng thái admin.
+*/
 document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('generateBtn');
-  if (btn) btn.addEventListener('click', generateCode);
+    const generateKeyBtn = document.getElementById('generateKeyBtn');
+    const statusDiv = document.getElementById('status');
+
+    // Hàm kiểm tra trạng thái admin từ backend
+    async function checkAdminStatus() {
+        try {
+            const response = await fetch('/api/admin/status');
+            const data = await response.json();
+            const isAdminGranted = data.admin_granted === true;
+
+            // Cập nhật trạng thái nút
+            generateKeyBtn.disabled = !isAdminGranted;
+
+            // Cập nhật hiển thị trạng thái
+            if (isAdminGranted) {
+                statusDiv.textContent = 'Trạng thái Admin: Đã đăng nhập';
+                statusDiv.className = 'admin-active';
+            } else {
+                statusDiv.textContent = 'Trạng thái Admin: Đã đăng xuất';
+                statusDiv.className = 'admin-inactive';
+            }
+
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra trạng thái admin:', error);
+            statusDiv.textContent = 'Trạng thái Admin: Lỗi kết nối';
+            statusDiv.className = 'admin-inactive';
+            generateKeyBtn.disabled = true; // Vô hiệu hóa nút nếu có lỗi
+        }
+    }
+
+    // Hàm xử lý khi nút "Tạo Key" được click (chỉ chạy khi nút không bị disabled)
+    generateKeyBtn.addEventListener('click', () => {
+        if (!generateKeyBtn.disabled) {
+            alert('Chức năng Tạo Key được kích hoạt!');
+            // TODO: Thêm logic tạo key thực tế ở đây
+        }
+    });
+
+    // Kiểm tra trạng thái admin lần đầu khi tải trang
+    checkAdminStatus();
+
+    // Kiểm tra trạng thái admin định kỳ (ví dụ: mỗi 5 giây)
+    // Điều này giúp cập nhật trạng thái nút nếu admin đăng nhập/đăng xuất ở tab khác
+    setInterval(checkAdminStatus, 5000); // 5000ms = 5 giây
 });

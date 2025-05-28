@@ -1,71 +1,27 @@
+// File: frontend/admin.html
+/*
+  Đây là trang quản trị đơn giản cho phép admin đăng nhập/đăng xuất.
+  Trạng thái đăng nhập/đăng xuất của admin được lưu trữ ở backend.
+*/
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Đăng nhập Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script defer src="admin.js"></script>
-  <style>
-    body {
-      background: #111;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: Arial;
-    }
-    .admin-container {
-      background: #222;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 15px #000;
-      width: 350px;
-      text-align: center;
-    }
-    h2 {
-      color: #ffcc00;
-      margin-bottom: 20px;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: none;
-    }
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #ffcc00;
-      color: #000;
-      font-weight: bold;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    button:hover {
-      background: #e6b800;
-    }
-    #logoutBtn {
-      background-color: #e74c3c;
-    }
-    #logoutBtn:hover {
-      background-color: #c0392b;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh; }
+        button { margin: 10px; padding: 10px 20px; cursor: pointer; }
+        #message { margin-top: 20px; color: green; }
+        .error { color: red; }
+    </style>
 </head>
 <body>
-  <div class="admin-container">
-    <h2>Admin Panel</h2>
-    <input type="text" id="username" placeholder="Tên đăng nhập">
-    <input type="password" id="password" placeholder="Mật khẩu">
-    <button onclick="adminLogin()">Đăng nhập</button>
-    <button id="logoutBtn" onclick="adminLogout()">Đăng xuất</button>
-  </div>
+    <h1>Bảng điều khiển Admin</h1>
+    <button id="loginBtn">Đăng nhập Admin</button>
+    <button id="logoutBtn">Đăng xuất Admin</button>
+    <div id="message"></div>
+
+    <script src="admin.js"></script>
 </body>
 </html>
