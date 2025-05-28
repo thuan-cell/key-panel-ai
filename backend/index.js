@@ -1,92 +1,61 @@
-const express = require("express");
-const cors = require("cors");
-const fs = require("fs").promises;
-const path = require("path");
+// File: backend/index.js (Thêm các API cho admin)
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-const IS_RENDER = process.env.RENDER === "true";
-const USERS_FILE = IS_RENDER ? path.join("/tmp", "users.json") : path.join(__dirname, "users.json");
-const ADMIN_FILE = IS_RENDER ? path.join("/tmp", "admin.json") : path.join(__dirname, "admin.json");
-
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use("/", express.static(path.join(__dirname, "../frontend")));
-
-async function readUsers() {
+// API Admin
+// Endpoint để đăng nhập admin (thiết lập trạng thái admin là true)
+app.post("/api/admin/login", async (req, res) => {
   try {
-    const data = await fs.readFile(USERS_FILE, "utf-8");
-    return JSON.parse(data);
+    await writeAdminStatus(true); // Ghi trạng thái admin là true
+    res.status(200).json({ message: "Đăng nhập admin thành công" });
+  } catch (error) {
+    console.error("Lỗi khi đăng nhập admin:", error);
+    res.status(500).json({ message: "Lỗi server khi đăng nhập admin" });
+  }
+});
+
+// Endpoint để đăng xuất admin (thiết lập trạng thái admin là false)
+app.post("/api/admin/logout", async (req, res) => {
+  try {
+    await writeAdminStatus(false); // Ghi trạng thái admin là false
+    res.status(200).json({ message: "Đăng xuất admin thành công" });
+  } catch (error) {
+    console.error("Lỗi khi đăng xuất admin:", error);
+    res.status(500).json({ message: "Lỗi server khi đăng xuất admin" });
+  }
+});
+
+// Endpoint để kiểm tra trạng thái admin
+app.get("/api/admin/status", async (req, res) => {
+  try {
+    const isAdmin = await readAdminStatus(); // Đọc trạng thái admin
+    res.status(200).json({ admin_granted: isAdmin }); // Trả về trạng thái
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra trạng thái admin:", error);
+    res.status(500).json({ message: "Lỗi server khi kiểm tra trạng thái admin" });
+  }
+});
+
+// Khởi động server
+app.listen(PORT, async () => {
+  // Đảm bảo các file dữ liệu tồn tại khi khởi động lần đầu
+  try {
+    await fs.access(USERS_FILE);
   } catch (err) {
-    if (err.code === "ENOENT") return [];
-    throw err;
+    if (err.code === 'ENOENT') {
+      await writeUsers([]);
+      console.log(`Created initial ${USERS_FILE}`);
+    } else {
+      throw err;
+    }
   }
-}
-
-async function writeUsers(users) {
-  await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), "utf-8");
-}
-
-async function writeAdminStatus(status) {
-  await fs.writeFile(ADMIN_FILE, JSON.stringify({ admin_granted: status }), "utf-8");
-}
-
-async function readAdminStatus() {
   try {
-    const data = await fs.readFile(ADMIN_FILE, "utf-8");
-    return JSON.parse(data).admin_granted === true;
-  } catch {
-    return false;
+    await fs.access(ADMIN_FILE);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      await writeAdminStatus(false);
+      console.log(`Created initial ${ADMIN_FILE}`);
+    } else {
+      throw err;
+    }
   }
-}
-
-// API người dùng
-app.post("/api/register", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ message: "Thiếu thông tin" });
-
-  const users = await readUsers();
-  if (users.find(u => u.username === username)) {
-    return res.status(400).json({ message: "Tài khoản đã tồn tại" });
-  }
-  users.push({ username, password });
-  await writeUsers(users);
-  res.status(200).json({ message: "Đăng ký thành công" });
-});
-
-app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ message: "Thiếu thông tin" });
-
-  const users = await readUsers();
-  const found = users.find(u => u.username === username && u.password === password);
-  if (found) return res.status(200).json({ message: "Đăng nhập thành công" });
-  res.status(401).json({ message: "Sai tài khoản hoặc mật khẩu" });
-});
-
-app.get("/api/users", async (req, res) => {
-  const users = await readUsers();
-  res.json(users);
-});
-
-// Quản lý quyền admin
-app.post("/api/grant-access", async (req, res) => {
-  await writeAdminStatus(true);
-  res.status(200).json({ success: true });
-});
-
-app.post("/api/revoke-access", async (req, res) => {
-  await writeAdminStatus(false);
-  res.status(200).json({ success: true });
-});
-
-app.get("/api/access-status", async (req, res) => {
-  const granted = await readAdminStatus();
-  res.status(200).json({ admin_granted: granted });
-});
-
-app.listen(PORT, () => {
-  console.log(`🌐 Server chạy tại http://localhost:${PORT}`);
+  console.log(`Server đang chạy trên cổng ${PORT}`);
 });
