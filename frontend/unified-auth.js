@@ -1,7 +1,6 @@
 const REGISTERED_USERS_STORAGE_KEY = 'registeredUsers';
 const CURRENT_USER_STORAGE_KEY = 'currentUser';
 
-// Lấy danh sách người dùng từ localStorage
 function getRegisteredUsers() {
   const usersJson = localStorage.getItem(REGISTERED_USERS_STORAGE_KEY);
   try {
@@ -12,7 +11,6 @@ function getRegisteredUsers() {
   }
 }
 
-// Lưu danh sách người dùng vào localStorage
 function saveRegisteredUsers(users) {
   try {
     localStorage.setItem(REGISTERED_USERS_STORAGE_KEY, JSON.stringify(users));
@@ -22,7 +20,6 @@ function saveRegisteredUsers(users) {
   }
 }
 
-// Lưu người dùng hiện tại
 function saveCurrentUser(user) {
   try {
     if (user && user.password) delete user.password;
@@ -33,24 +30,10 @@ function saveCurrentUser(user) {
   }
 }
 
-// Xóa người dùng hiện tại
 function removeCurrentUser() {
   localStorage.removeItem(CURRENT_USER_STORAGE_KEY);
 }
 
-// Kiểm tra đăng nhập
-function checkAuthStatus() {
-  const currentUserJson = localStorage.getItem(CURRENT_USER_STORAGE_KEY);
-  try {
-    const currentUser = currentUserJson ? JSON.parse(currentUserJson) : null;
-    return currentUser && currentUser.username;
-  } catch (e) {
-    console.error("Lỗi kiểm tra đăng nhập:", e);
-    return false;
-  }
-}
-
-// Đăng nhập
 function login() {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -78,7 +61,6 @@ function login() {
   }
 }
 
-// Đăng ký
 function register() {
   const username = document.getElementById("reg_username").value.trim();
   const password = document.getElementById("reg_password").value.trim();
@@ -108,22 +90,12 @@ function register() {
   });
 }
 
-// Chuyển qua form đăng ký
 function showRegister() {
   document.getElementById("loginForm").style.display = "none";
   document.getElementById("registerForm").style.display = "block";
 }
 
-// Chuyển qua form đăng nhập
 function showLogin() {
   document.getElementById("loginForm").style.display = "block";
   document.getElementById("registerForm").style.display = "none";
-}
-
-// Đăng xuất
-function logout() {
-  removeCurrentUser();
-  Swal.fire("Thông báo", "Đăng xuất thành công!", "info").then(() => {
-    window.location.href = 'https://genkey-ai.onrender.com/auth.html';
-  });
 }
