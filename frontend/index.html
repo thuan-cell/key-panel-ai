@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- jQuery được sử dụng trong các hàm JS được cung cấp -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <!-- 
+  <!--
     Dựa trên danh sách tệp được cung cấp (genkey.js, unified-auth.js),
     hàm 'logout', xử lý logic xác thực,
     lý tưởng nên được đặt trong 'unified-auth.js' để tổ chức mã tốt hơn.
@@ -16,7 +16,7 @@
   -->
   <script defer src="genkey.js"></script>
   <!-- Uncomment the line below if the authentication functions (including logout) are moved to unified-auth.js -->
-  <script defer src="unified-auth.js"></script> 
+  <script defer src="unified-auth.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -116,8 +116,26 @@
 
  <script>
   document.addEventListener('DOMContentLoaded', async () => {
+    // Ensure checkAuthStatus and checkAdminAccess are available before calling them
     const isLoggedIn = typeof checkAuthStatus === 'function' ? checkAuthStatus() : false;
-    const isAdminGranted = typeof checkAdminAccess === 'function' ? await checkAdminAccess() : false;
+    // checkAdminAccess is async, handle potential errors during the call
+    let isAdminGranted = false;
+    if (typeof checkAdminAccess === 'function') {
+        try {
+            isAdminGranted = await checkAdminAccess();
+        } catch (error) {
+            console.error("Error checking admin access:", error);
+            // Assume access is not granted if the check fails
+            isAdminGranted = false;
+            // Optionally show an error message about the failed check
+            Swal.fire("Lỗi kiểm tra quyền", "Không thể xác minh quyền truy cập admin. Vui lòng thử lại.", "error");
+        }
+    } else {
+        console.warn("checkAdminAccess function not found.");
+        // If the function isn't even defined, access cannot be granted
+        isAdminGranted = false;
+    }
+
 
     const generateButton = document.getElementById('generateBtn');
     const serialInput = document.getElementById('serialInput');
@@ -132,6 +150,9 @@
       serialInput.disabled = true;
       expireInput.disabled = true;
       resultTextarea.disabled = true;
+      // Hide elements instead of setting display to 'none' initially,
+      // then show them if access is granted.
+      // Setting display to 'none' here ensures they are hidden if checks fail.
       logoutButton.style.display = 'none';
       historyToggleButton.style.display = 'none';
       historyContainer.style.display = 'none';
@@ -142,26 +163,38 @@
       serialInput.disabled = false;
       expireInput.disabled = false;
       resultTextarea.disabled = false;
-      logoutButton.style.display = '';
-      historyToggleButton.style.display = '';
+      logoutButton.style.display = ''; // Show logout button
+      historyToggleButton.style.display = ''; // Show history toggle button
+      // historyContainer remains hidden until toggled
     }
 
+    // Initially disable UI until checks pass
+    disableUI();
+
     if (!isLoggedIn) {
-      disableUI();
+      console.log("User not logged in. Redirecting to auth.html");
       Swal.fire("Chưa đăng nhập", "Vui lòng đăng nhập để tiếp tục.", "warning")
         .then(() => window.location.href = "auth.html");
-      return;
+      return; // Stop further execution
     }
 
     if (!isAdminGranted) {
-      disableUI();
+      console.log("User logged in but admin access not granted. Redirecting to auth.html");
       Swal.fire("Từ chối truy cập", "Admin chưa cấp quyền truy cập.", "error")
         .then(() => window.location.href = "auth.html");
-      return;
+      return; // Stop further execution
     }
 
-    // ✅ Nếu pass cả hai
+    // ✅ If both checks pass
+    console.log("User logged in and admin access granted. Enabling UI.");
     enableUI();
+    // Load history only if UI is enabled
+    if (typeof loadHistory === 'function') {
+        loadHistory();
+    } else {
+        console.warn("loadHistory function not found.");
+        document.getElementById('historyItems').innerText = "Không thể tải lịch sử (hàm loadHistory không tồn tại).";
+    }
   });
 </script>
 

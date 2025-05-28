@@ -37,7 +37,8 @@ function adminLogin() {
         Swal.fire("Lỗi", errorMessage, "error");
       });
   } else {
-    Swal.fire("Lỗi", "Sai tài khoản hoặc mật khẩu!", "error");
+    // Display the "Not logged in" message as the failure case for login attempt
+    Swal.fire("Lỗi Chưa đăng nhập", "Sai tài khoản hoặc mật khẩu!", "error");
   }
 }
 
