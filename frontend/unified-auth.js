@@ -179,7 +179,7 @@ function logout() {
   removeCurrentUser();
   Swal.fire("Thông báo", "Đăng xuất thành công!", "info").then(() => {
     // Chuyển hướng về trang đăng nhập/đăng ký sau khi đăng xuất
-    window.location.href = 'https://key-panel-aihtml1.onrender.com/auth.html';
+    window.location.href = 'https://genkey-ai.onrender.com/index.html';
   });
 }
 
