@@ -262,6 +262,61 @@
   display: none;
 }
 
+@media (max-width: 768px) {
+  header {
+    padding: 12px 16px;
+  }
+
+  .header-container h1 {
+    font-size: 1.1rem;
+  }
+
+  nav ul {
+    gap: 10px;
+    font-size: 0.85rem;
+  }
+
+  main {
+    flex-direction: column;
+    padding: 40px 12px;
+    background-size: cover;
+  }
+
+  .card {
+    padding: 24px 16px;
+    margin: 0 auto;
+    max-width: 100%;
+    box-shadow: none;
+  }
+
+  .card h2 {
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+  }
+
+  .card input,
+  .card button {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+
+  .qr-container img {
+    max-width: 140px;
+  }
+
+  .current-balance {
+    font-size: 1rem;
+  }
+
+  .sidebar {
+    display: none !important; /* Ẩn sidebar trên mobile */
+  }
+
+  footer {
+    padding: 16px 12px;
+    font-size: 0.8rem;
+  }
+}
 
 
 
