@@ -2,118 +2,490 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <title>Cập nhật số dư (Độc lập)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ví Thanh Toán Nhanh</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #c9f1ec, #e4e9f1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    header {
+      width: 100%;
+      background: rgba(67, 206, 162, 0.9);
+      backdrop-filter: blur(10px);
+      color: white;
+      padding: 16px 32px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-container {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .header-container h1 {
+      font-size: 1.4rem;
+    }
+
+    nav ul {
+      display: flex;
+      list-style: none;
+      gap: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    .user-info {
+      color: #e0f5f0;
+      font-size: 0.9rem;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 0;
+      padding: 60px 16px;
+      background: url("https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1470&q=80") center/cover no-repeat;
     }
-    .container {
-      background: white;
-      padding: 24px 32px;
-      border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    .card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      color: #fff;
       text-align: center;
-      width: 300px;
     }
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
+
+    .card h2 {
+      margin-bottom: 24px;
+      font-weight: 600;
+      color: #fff;
     }
-    .current-balance {
-      font-size: 1.2rem;
-      margin-bottom: 16px;
-      color: #008060;
-      font-weight: bold;
-    }
-    input[type=number] {
+
+    .card input {
       width: 100%;
       padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
       font-size: 1rem;
-      margin-bottom: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      outline-offset: 2px;
-      box-sizing: border-box;
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      backdrop-filter: blur(10px);
     }
-    button {
-      padding: 12px 0;
+
+    .card input::placeholder {
+      color: #f0f0f0;
+    }
+
+    .card button {
       width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
       background-color: #43cea2;
       color: white;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background 0.3s ease;
     }
-    button:hover {
-      background-color: #36b996;
+
+    .card button:hover {
+      background-color: #38b98f;
     }
+
+    .qr-container {
+      margin-top: 24px;
+    }
+
+    .qr-container img {
+      max-width: 180px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .current-balance {
+      font-size: 1.2rem;
+      margin: 16px 0;
+      color: #fff;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #4caf50;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 999;
+    }
+
+    footer {
+      background: #f9f9f9;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+      color: #666;
+      width: 100%;
+      border-top: 1px solid #eee;
+    }
+
+    @media (max-width: 600px) {
+      .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      nav ul {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .card {
+        padding: 30px 20px;
+      }
+    }
+    .switch-msg {
+  text-align: center;
+  font-size: 14px;
+  margin-top: 16px;
+  color: #666;
+}
+
+.switch-msg a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.switch-msg a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+.sidebar {
+  position: fixed;
+  top: 0px;
+  left: 0;
+  width: 180px;
+  height: calc(100% - 0px);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 20px 10px;
+  gap: 12px;
+  z-index: 998;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+  transition: all 0.3s ease;
+  
+}
+
+.sidebar button {
+  width: 100%;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 16px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.sidebar button span:first-child {
+  font-size: 18px; /* icon */
+}
+
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+.sidebar.hidden {
+  display: none;
+}
+
+
+
+
+
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Cập nhật số dư</h2>
-    <div class="current-balance" id="currentBalance">Đang tải...</div>
-    <input id="balanceInput" type="number" placeholder="Nhập số tiền..." min="0" step="1" />
-    <button id="updateBtn">Cập nhật</button>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-container">
+      <h1>💸 Ví Thanh Toán Nhanh</h1>
+      <nav>
+        <ul>
+          <li><a href="#">Trang chủ</a></li>
+          <li><a href="#">Nạp tiền</a></li>
+          <li><a href="#">Lịch sử</a></li>
+          <li><a href="#" onclick="logout()">Đăng xuất</a></li>
+          <li class="user-info" id="userInfo">Chưa đăng nhập</li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+ <!-- ĐĂNG NHẬP / ĐĂNG KÝ -->
+<section id="authSection" class="card">
+  <div id="authForm">
+    <h2 id="formTitle">Đăng nhập tài khoản</h2>
+    <input type="email" id="email" placeholder="Nhập email..." required />
+    <input type="password" id="password" placeholder="Nhập mật khẩu..." required />
+    <button onclick="loginOrRegister()" id="loginBtn">Đăng nhập</button>
+    <p id="switchMsg" class="switch-msg">
+      Chưa có tài khoản? <a href="#" onclick="switchAuthMode('register')">Đăng ký ngay</a>
+    </p>
   </div>
+</section>
+    <!-- QUẢN LÝ SỐ DƯ -->
+    <section id="mainSection" class="card hidden">
+      <h2>Quản lý số dư</h2>
+      <div class="qr-container">
+        <img src="qr.png" alt="Mã QR MoMo" />
+        <p>Quét mã QR MoMo để nạp tiền</p>
+      </div>
+      <div class="current-balance">Số dư: <span id="currentBalance">0</span> ₫</div>
+      <input type="number" id="balanceInput" placeholder="Nhập số dư mới (₫)" min="0" step="1000" />
+      <button onclick="updateBalance()">Cập nhật số dư</button>
+    </section>
+  </main>
+ <!-- MENU CHÍNH BÊN TRÁI -->
+<div class="sidebar hidden" id="mainMenu">
+  <button><span>🏠</span> <span>Trang chủ</span></button>
+  <button><span>💳</span> <span>Nạp tiền</span></button>
+  <button><span>🔁</span> <span>Chuyển khoản</span></button>
+  <button><span>📜</span> <span>Lịch sử GD</span></button>
+  <button><span>📊</span> <span>Thống kê</span></button>
+  <button><span>👤</span> <span>Tài khoản</span></button>
+  <button><span>⚙️</span> <span>Cài đặt</span></button>
+  <button><span>📞</span> <span>Hỗ trợ</span></button>
+  <button><span>📣</span> <span>Giới thiệu</span></button>
+  <button onclick="logout()"><span>🚪</span> <span>Đăng xuất</span></button>
+</div>
 
-  <script>
-    const BIN_ID = "683709868561e97a501c9633";
-    const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
 
-    const btn = document.getElementById("updateBtn");
-    const input = document.getElementById("balanceInput");
-    const balanceDisplay = document.getElementById("currentBalance");
 
-    function fetchBalance() {
-      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: {
-          'X-Master-Key': API_KEY
-        }
-      })
-      .then(res => res.json())
-      .then(data => {
-        const current = data.record.balance;
-        balanceDisplay.textContent = `Số dư hiện tại: ${current.toLocaleString('vi-VN')} ₫`;
-      })
-      .catch(() => {
-        balanceDisplay.textContent = "Không thể tải số dư.";
-      });
-    }
+  <!-- TOAST -->
+  <div class="toast" id="toast">Thông báo</div>
 
-    btn.addEventListener("click", () => {
-      const value = Number(input.value);
-      if (isNaN(value) || value < 0) return;
+  <!-- FOOTER -->
+  <footer>
+    <p>&copy; 2025 Ví Thanh Toán Nhanh. Mọi quyền được bảo lưu.</p>
+    <p>Liên hệ: support@thanhtoan.vn</p>
+  </footer>
 
-      btn.disabled = true;
+  <!-- SCRIPT giữ nguyên -->
 
-      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': API_KEY
-        },
-        body: JSON.stringify({ balance: value })
-      })
-      .then(() => {
-        fetchBalance(); // cập nhật lại hiển thị sau khi PUT thành công
-      })
-      .finally(() => {
-        btn.disabled = false;
-      });
+<script>
+  // ID và API key để truy cập JSONBin
+  const BIN_ID = "683abf6e8960c979a5a364cc";
+  const API_KEY = "$2a$10$neuJOkSf/vIDc29/lArDz.7ChrunFea17sXAZLvRsJyztpIV0oJkG";
+
+  let currentUser = null;
+
+  // Hiển thị thông báo ngắn trên màn hình (toast)
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.display = "block";
+    setTimeout(() => {
+      toast.style.display = "none";
+    }, 2500);
+  }
+
+  // Lấy dữ liệu người dùng từ JSONBin
+  async function fetchUserData() {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': API_KEY }
     });
+    const data = await res.json();
+    return data.record.users || {};
+  }
 
-    // Tải số dư khi trang load
-    fetchBalance();
-  </script>
+  // Cập nhật dữ liệu người dùng lên JSONBin
+  async function updateUserData(users) {
+    await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': API_KEY
+      },
+      body: JSON.stringify({ users })
+    });
+  }
+
+  // Đăng ký tài khoản mới
+  async function register() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (!email || !password) return showToast("Vui lòng nhập đầy đủ!");
+
+    const users = await fetchUserData();
+    if (users[email]) {
+      showToast("Tài khoản đã tồn tại!");
+      return;
+    }
+    users[email] = { password, balance: 0 }; // Tạo tài khoản với số dư mặc định = 0
+    await updateUserData(users);
+    showToast("Đăng ký thành công! Hãy đăng nhập.");
+  }
+
+  // Đăng nhập người dùng
+  async function login() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const users = await fetchUserData();
+    if (users[email] && users[email].password === password) {
+      currentUser = email;
+      localStorage.setItem("loggedInUser", email); // Lưu trạng thái đăng nhập
+      showMain(users[email].balance); // Hiển thị giao diện chính
+      showToast("Đăng nhập thành công!");
+    } else {
+      showToast("Sai thông tin đăng nhập.");
+    }
+  }
+
+  // Đăng xuất người dùng
+  function logout() {
+    currentUser = null;
+    localStorage.removeItem("loggedInUser");
+    document.getElementById("authSection").classList.remove("hidden");
+    document.getElementById("mainSection").classList.add("hidden");
+    document.getElementById("mainMenu").classList.add("hidden");
+    document.getElementById("userInfo").textContent = "Chưa đăng nhập";
+  }
+
+  // Hiển thị giao diện chính khi đã đăng nhập
+  function showMain(balance) {
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("mainSection").classList.remove("hidden");
+    document.getElementById("mainMenu").classList.remove("hidden");
+    document.getElementById("currentBalance").textContent = Number(balance).toLocaleString('vi-VN');
+    document.getElementById("userInfo").textContent = currentUser || "Chưa đăng nhập";
+  }
+
+  // Cập nhật số dư cho người dùng hiện tại
+  async function updateBalance() {
+    const value = Number(document.getElementById("balanceInput").value);
+    if (isNaN(value) || value < 0 || !currentUser) return;
+
+    const users = await fetchUserData();
+    users[currentUser].balance = value;
+    await updateUserData(users);
+    showToast("Số dư đã được cập nhật!");
+    document.getElementById("balanceInput").value = "";
+    document.getElementById("currentBalance").textContent = value.toLocaleString('vi-VN');
+  }
+
+  // Khi trang được tải, kiểm tra xem người dùng đã đăng nhập chưa
+  (async () => {
+    const savedUser = localStorage.getItem("loggedInUser");
+    if (savedUser) {
+      const users = await fetchUserData();
+      if (users[savedUser]) {
+        currentUser = savedUser;
+        showMain(users[savedUser].balance);
+      }
+    }
+  })();
+
+  let authMode = 'login';
+  let isRegisterMode = false;
+
+  // Chuyển đổi giữa chế độ đăng nhập và đăng ký
+  function switchAuthMode(mode) {
+    const title = document.getElementById("formTitle");
+    const loginBtn = document.getElementById("loginBtn");
+    const switchMsg = document.getElementById("switchMsg");
+
+    if (mode === "register") {
+      isRegisterMode = true;
+      title.textContent = "Đăng ký tài khoản mới";
+      loginBtn.textContent = "Đăng ký";
+      switchMsg.innerHTML = `Đã có tài khoản? <a href="#" onclick="switchAuthMode('login')">Đăng nhập</a>`;
+    } else {
+      isRegisterMode = false;
+      title.textContent = "Đăng nhập tài khoản";
+      loginBtn.textContent = "Đăng nhập";
+      switchMsg.innerHTML = `Chưa có tài khoản? <a href="#" onclick="switchAuthMode('register')">Đăng ký ngay</a>`;
+    }
+  }
+
+  // Gọi hàm đăng nhập hoặc đăng ký tùy theo chế độ hiện tại
+  async function loginOrRegister() {
+    if (isRegisterMode) {
+      await register();
+    } else {
+      await login();
+    }
+  }
+
+</script>
+
+
+
 </body>
 </html>
