@@ -26,6 +26,12 @@
       margin-bottom: 20px;
       color: #333;
     }
+    .current-balance {
+      font-size: 1.2rem;
+      margin-bottom: 16px;
+      color: #008060;
+      font-weight: bold;
+    }
     input[type=number] {
       width: 100%;
       padding: 12px;
@@ -55,6 +61,7 @@
 <body>
   <div class="container">
     <h2>Cập nhật số dư</h2>
+    <div class="current-balance" id="currentBalance">Đang tải...</div>
     <input id="balanceInput" type="number" placeholder="Nhập số tiền..." min="0" step="1" />
     <button id="updateBtn">Cập nhật</button>
   </div>
@@ -65,13 +72,28 @@
 
     const btn = document.getElementById("updateBtn");
     const input = document.getElementById("balanceInput");
+    const balanceDisplay = document.getElementById("currentBalance");
+
+    function fetchBalance() {
+      fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        headers: {
+          'X-Master-Key': API_KEY
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        const current = data.record.balance;
+        balanceDisplay.textContent = `Số dư hiện tại: ${current.toLocaleString('vi-VN')} ₫`;
+      })
+      .catch(() => {
+        balanceDisplay.textContent = "Không thể tải số dư.";
+      });
+    }
 
     btn.addEventListener("click", () => {
       const value = Number(input.value);
-      if (isNaN(value) || value < 0) {
-        // Không làm gì nếu nhập sai
-        return;
-      }
+      if (isNaN(value) || value < 0) return;
+
       btn.disabled = true;
 
       fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
@@ -82,10 +104,16 @@
         },
         body: JSON.stringify({ balance: value })
       })
+      .then(() => {
+        fetchBalance(); // cập nhật lại hiển thị sau khi PUT thành công
+      })
       .finally(() => {
         btn.disabled = false;
       });
     });
+
+    // Tải số dư khi trang load
+    fetchBalance();
   </script>
 </body>
 </html>
