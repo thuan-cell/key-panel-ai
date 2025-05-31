@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ví Thanh Toán Nhanh</title>
+  <title>VANRETOUCH</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     * {
@@ -318,6 +318,46 @@
   }
 }
 
+/* Ẩn sidebar mặc định trên mobile */
+@media (max-width: 768px) {
+  #sidebar {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 50px;
+    width: 250px;
+    background-color: #f4f4f4;
+    height: 100%;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  }
+
+  #sidebar.active {
+    display: block;
+  }
+
+  .menu-toggle {
+    display: inline-block;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin: 10px;
+  }
+}
+
+/* Trên desktop ẩn nút ☰ */
+@media (min-width: 769px) {
+  .menu-toggle {
+    display: none;
+  }
+
+  #sidebar {
+    display: block; /* Sidebar luôn hiển thị trên desktop */
+    position: static;
+    width: 250px;
+  }
+}
 
 
 
@@ -328,7 +368,10 @@
   <!-- HEADER -->
   <header>
     <div class="header-container">
-      <h1>💸 Ví Thanh Toán Nhanh</h1>
+      <!-- Nút mở sidebar trên mobile -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+      <h1>VANRETOUCH</h1>
       <nav>
         <ul>
           <li><a href="#">Trang chủ</a></li>
@@ -537,6 +580,16 @@
       await login();
     }
   }
+
+
+
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('active');
+}
+
+
 
 </script>
 
