@@ -357,7 +357,31 @@
   }
 }
 
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9998; /* Below sidebar (9999), above main content */
+  display: none; /* Hidden by default */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
 
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Hide overlay on desktop */
+@media (min-width: 769px) {
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
 
   </style>
 </head>
@@ -367,7 +391,7 @@
   <header>
     <div class="header-container">
       <!-- Nút mở sidebar trên mobile -->
-<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<button id="menuToggleBtn" class="menu-toggle" onclick="toggleSidebar()">☰</button>
 
       <h1>VANRETOUCH</h1>
       <nav>
@@ -408,6 +432,9 @@
       <button onclick="updateBalance()">Cập nhật số dư</button>
     </section>
   </main>
+ <!-- Overlay cho sidebar trên mobile -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
  <!-- MENU CHÍNH BÊN TRÁI -->
 <div class="sidebar hidden" id="mainMenu">
   <button><span>🏠</span> <span>Trang chủ</span></button>
@@ -512,6 +539,16 @@
     document.getElementById("mainSection").classList.add("hidden");
     document.getElementById("mainMenu").classList.add("hidden");
     document.getElementById("userInfo").textContent = "Chưa đăng nhập";
+    // Hide menu toggle button on logout
+    const menuToggleBtn = document.getElementById("menuToggleBtn");
+    if (menuToggleBtn) {
+      menuToggleBtn.style.display = 'none';
+    }
+    // Ensure sidebar and overlay are closed
+    const sidebar = document.getElementById('mainMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
   }
 
   // Hiển thị giao diện chính khi đã đăng nhập
@@ -521,6 +558,11 @@
     document.getElementById("mainMenu").classList.remove("hidden");
     document.getElementById("currentBalance").textContent = Number(balance).toLocaleString('vi-VN');
     document.getElementById("userInfo").textContent = currentUser || "Chưa đăng nhập";
+    // Show menu toggle button when logged in
+    const menuToggleBtn = document.getElementById("menuToggleBtn");
+    if (menuToggleBtn) {
+      menuToggleBtn.style.display = ''; // Reset to default (block on mobile via CSS)
+    }
   }
 
   // Cập nhật số dư cho người dùng hiện tại
@@ -539,11 +581,20 @@
   // Khi trang được tải, kiểm tra xem người dùng đã đăng nhập chưa
   (async () => {
     const savedUser = localStorage.getItem("loggedInUser");
+    const menuToggleBtn = document.getElementById("menuToggleBtn"); // Get button reference
     if (savedUser) {
       const users = await fetchUserData();
       if (users[savedUser]) {
         currentUser = savedUser;
         showMain(users[savedUser].balance);
+      } else {
+        // User was saved but no longer exists or invalid, log out
+        logout();
+      }
+    } else {
+      // Not logged in, ensure menu toggle is hidden
+      if (menuToggleBtn) {
+        menuToggleBtn.style.display = 'none';
       }
     }
   })();
@@ -579,24 +630,24 @@
     }
   }
 
-
-
+// Function to toggle sidebar and overlay
 function toggleSidebar() {
   const sidebar = document.getElementById('mainMenu');
+  const overlay = document.querySelector('.sidebar-overlay');
   sidebar.classList.toggle('active');
+  overlay.classList.toggle('active');
 }
 
-
-
+// Close sidebar and overlay when a menu button is clicked
 const menuButtons = document.querySelectorAll('.sidebar button');
 menuButtons.forEach(btn => {
   btn.addEventListener('click', () => {
     const sidebar = document.getElementById('mainMenu');
+    const overlay = document.querySelector('.sidebar-overlay');
     sidebar.classList.remove('active'); // Đóng sidebar khi chọn menu
+    overlay.classList.remove('active'); // Đóng overlay
   });
 });
-
-
 
 </script>
 
