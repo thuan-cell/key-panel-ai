@@ -308,54 +308,52 @@
     font-size: 1rem;
   }
 
-  .sidebar {
-    display: none !important; /* Ẩn sidebar trên mobile */
-  }
+  
 
   footer {
     padding: 16px 12px;
     font-size: 0.8rem;
   }
 }
+.menu-toggle {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  display: none; /* Ẩn mặc định */
+}
 
-/* Ẩn sidebar mặc định trên mobile */
 @media (max-width: 768px) {
-  #sidebar {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 50px;
-    width: 250px;
-    background-color: #f4f4f4;
-    height: 100%;
-    z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  }
-
-  #sidebar.active {
-    display: block;
-  }
-
   .menu-toggle {
-    display: inline-block;
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin: 10px;
+    display: block; /* Hiện trên mobile */
   }
 }
 
-/* Trên desktop ẩn nút ☰ */
-@media (min-width: 769px) {
-  .menu-toggle {
-    display: none;
+/* Ẩn sidebar trên mobile mặc định */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 250px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 20px 10px;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 9999;
   }
 
-  #sidebar {
-    display: block; /* Sidebar luôn hiển thị trên desktop */
-    position: static;
-    width: 250px;
+  /* Khi active, hiện sidebar */
+  .sidebar.active {
+    transform: translateX(0);
   }
 }
 
@@ -583,11 +581,20 @@
 
 
 
-
 function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
+  const sidebar = document.getElementById('mainMenu');
   sidebar.classList.toggle('active');
 }
+
+
+
+const menuButtons = document.querySelectorAll('.sidebar button');
+menuButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sidebar = document.getElementById('mainMenu');
+    sidebar.classList.remove('active'); // Đóng sidebar khi chọn menu
+  });
+});
 
 
 
